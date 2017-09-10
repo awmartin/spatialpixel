@@ -1,9 +1,9 @@
 import csv
 import urllib
 
-
 # Open the file, grab the lat and lon values as floats,
 # and store in the "locations" array.
+
 locations = []
 with open('locations.csv', 'rb') as csvfile:
     reader = csv.reader(csvfile)
@@ -19,10 +19,10 @@ with open('locations.csv', 'rb') as csvfile:
         location = (lat, lon)
         locations.append(location)
 
-# Prepare the url for interpolation.
-api_key = "XXXXXXXXXXX"
-base_url = "https://maps.googleapis.com/maps/api/streetview?size=640x400&location={0},{1}&fov=90&heading={2}&pitch=10&key=" + api_key
+# Pur your Google Street View API key here.
+api_key = "xxxxxxxx"
 
+api_url = "https://maps.googleapis.com/maps/api/streetview?size=640x400&location={0},{1}&fov=90&heading={2}&pitch=10&key={3}"
 row = 2
 headings = [0, 90, 180, 270]
 
@@ -31,7 +31,7 @@ for location in locations:
     for direction in headings:
         # Create the URL for the request to Google.
         lat, lon = location
-        url = base_url.format(lat, lon, direction)
+        url = api_url.format(lat, lon, direction, api_key)
 
         # Create the filename we want to save as, e.g. location-2-90.jpg.
         filename = "location-{0}-{1}.jpg".format(row, direction)
@@ -43,6 +43,4 @@ for location in locations:
     # Increment the row to correlate with the Excel file.
     row += 1
     
-    
-    
-    
+print "Done"
