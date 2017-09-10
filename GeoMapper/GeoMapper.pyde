@@ -11,7 +11,7 @@ def draw():
     background(255)
     
     # Create a new map, centered at Lower Manhattan, filling the size of the sketch.
-    geo = geomap.GeoMap(40.714728, -73.998672, 13, width, height, 'terrain')
+    geo = geomap.GeoMap(40.714728, -73.998672, 12, width, height, 'terrain')
     geo.createBaseMap()
     
     # Apply some styling to the map in Processing.

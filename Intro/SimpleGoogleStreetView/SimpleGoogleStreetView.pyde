@@ -19,7 +19,7 @@ with open('locations.csv', 'rb') as csvfile:
         location = (lat, lon)
         locations.append(location)
 
-# Pur your Google Street View API key here.
+# Put your Google Street View API key here.
 api_key = "xxxxxxxx"
 
 api_url = "https://maps.googleapis.com/maps/api/streetview?size=640x400&location={0},{1}&fov=90&heading={2}&pitch=10&key={3}"
