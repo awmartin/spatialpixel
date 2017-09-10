@@ -3,7 +3,7 @@
 # function. Thus, you can place your CSV locations into the 'data' variable
 # in locationscsv.py instead.
 #
-# https://github.com/jdf/Processing.py-Bugs/issues/193
+# https://github.com/jdf/processing.py/issues/274
 #
 # Once the issue is resolved or a workaround found, this file will go away.
 
