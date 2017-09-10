@@ -1,10 +1,6 @@
 import xml.etree.ElementTree as ET
 
 class RenderKML(object):
-    tree = None
-    
-    elts = None
-    
     def __init__(self, xmlfile):
         self.tree = ET.parse(xmlfile)
         self.elts = []

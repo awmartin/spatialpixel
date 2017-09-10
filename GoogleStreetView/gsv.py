@@ -13,14 +13,11 @@ import csv
 
 
 class GoogleStreetViewPhotos(object):
-    locations = None
-    api_key = None
-    csvdialect = None
-    has_header_row = False
-
     def __init__(self, api_key):
         self.locations = []
         self.api_key = api_key
+        self.csvdialect = None
+        self.has_header_row = False
 
     def addLatLon(self, lat, lon):
         self.locations.append((lat, lon))

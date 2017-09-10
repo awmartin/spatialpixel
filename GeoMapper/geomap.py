@@ -36,20 +36,6 @@ class GeoMap(object):
         'carto-darknolabels' : "http://cartodb-basemaps-1.global.ssl.fastly.net/dark_nolabels/%s/%s/%s.png",
         }
     
-    baseMap = None
-    url = None
-    
-    w = None
-    h = None
-    zoom = None
-    lat = None
-    lon = None
-    
-    centerX = None
-    centerY = None
-    offsetX = None
-    offsetY = None
-    
     tileSize = 256.0
     
     def __init__(self, lat, lon, zoom, w, h, server='toner'):

@@ -1,8 +1,6 @@
 import json
 
 class RenderGeoJson(object):
-    data = None
-    
     def __init__(self, file):
         self.data = json.load(file)
     
