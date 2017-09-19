@@ -4,13 +4,12 @@ class RenderKML(object):
     def __init__(self, xmlfile):
         self.tree = ET.parse(xmlfile)
         self.elts = []
-        
-        self.parse()
+        self.pgraphics = None
     
     def parse(self):
-        root = self.tree.getroot()
-        for item in root:
-            for subitem in item:
+        root = self.tree.getroot()  # <kml>
+        for item in root:  # <Document>
+            for subitem in item:  # <Placemark>
                 if subitem.tag.endswith("Placemark"):
                     self.parsePlacemark(subitem)
     
@@ -18,36 +17,64 @@ class RenderKML(object):
         for child in placemark:
             if child.tag.endswith("LineString"):
                 self.parseLineString(child)
+            if child.tag.endswith("Track"):
+                self.parseTrack(child)
     
     def parseLineString(self, lineString):
         for subchild in lineString:
             if subchild.tag.endswith("coordinates"):
                 coordinates_text = subchild.text
                 points = self.parseCoordinates(coordinates_text)
-                self.elts.append(LineString(points))
+                self.elts.append(KmlLineString(points))
     
     def parseCoordinates(self, coordinates_text):
         points_text = coordinates_text.strip().split(" ")
         return map(self.parsePoint, points_text)
 
-    def parsePoint(self, point_text):
-        params = point_text.split(",")
+    def parsePoint(self, point_text, separator=","):
+        params = point_text.split(separator)
         return (float(params[0]), float(params[1]))
+    
+    def parseTrack(self, track):
+        for entry in track:
+            tag = entry.tag.strip()
+            if tag.endswith("AltitudeMode"):
+                pass
+            elif tag.endswith("when"):
+                pass
+            elif tag.endswith("coord"):
+                pt = self.parsePoint(entry.text, separator=" ")
+                self.elts.append(KmlWayPoint(pt))
+    
+    def render(self, lonToX, latToY, pgraphics):
+        for elt in self.elts:
+            elt.draw(lonToX, latToY, pgraphics)
 
     def draw(self, lonToX, latToY):
         for elt in self.elts:
             elt.draw(lonToX, latToY)
 
-class LineString(object):
-    points = None
-    
+class KmlLineString(object):
     def __init__(self, points):
         self.points = points
     
-    def draw(self, lonToX, latToY):
-        s = createShape()
+    def draw(self, lonToX, latToY, pgraphics):
+        s = pgraphics.createShape()
         s.beginShape()
         for pt in self.points:
-            s.vertex(lonToX(pt[0]), latToY(pt[1]))
+            x = lonToX(pt[0])
+            y = latToY(pt[1])
+            s.vertex(x, y)
         s.endShape()
-        shape(s, 0, 0)
+        pgraphics.shape(s, 0, 0)
+
+class KmlWayPoint(object):
+    def __init__(self, pt):
+        self.pt = pt
+    
+    def draw(self, lonToX, latToY, pgraphics):
+        x = lonToX(self.pt[0])
+        y = latToY(self.pt[1])
+        pgraphics.ellipse(x, y, 5, 5)
+
+

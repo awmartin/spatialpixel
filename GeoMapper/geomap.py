@@ -1,4 +1,15 @@
 import math
+import lazyimages
+
+
+def lonToTile(lon, zoom):
+    """Given a longitude and zoom value, return the X map tile index."""
+    return ((lon + 180.0) / 360.0) * math.pow(2, zoom)
+
+def latToTile(lat, zoom):
+    """Given a latitude and zoom value, return the Y map tile index."""
+    return (1.0 - math.log(math.tan(lat * math.pi / 180.0) + 1.0 / math.cos(lat * math.pi / 180.0)) / math.pi) / 2.0 * math.pow(2, zoom)
+
 
 class GeoMap(object):
     """GeoMap will draw a map given a location, zoom, and public tile server."""
@@ -39,7 +50,7 @@ class GeoMap(object):
     tileSize = 256.0
     
     def __init__(self, lat, lon, zoom, w, h, server='toner'):
-        self.baseMap = createGraphics(w, h)
+        self.baseMap = createGraphics(floor(w), floor(h))
         
         if server in self.tile_servers:
             self.url = self.tile_servers[server]
@@ -50,24 +61,44 @@ class GeoMap(object):
         
         self.lat = lat
         self.lon = lon
-        self.zoom = min(zoom, 18)
-        self.w = w
-        self.h = h
+        self.setZoom(zoom)
         
         self.centerX = lonToTile(self.lon, self.zoom)
         self.centerY = latToTile(self.lat, self.zoom)
         self.offsetX = floor((floor(self.centerX) - self.centerX) * self.tileSize)
         self.offsetY = floor((floor(self.centerY) - self.centerY) * self.tileSize)
+        
+        self.lazyImageManager = lazyimages.LazyImageManager()
+    
+    def setZoom(self, zoom):
+        print "Setting zoom to", zoom
+        self.zoom = max(min(zoom, 18), 1)
+        self.centerX = lonToTile(self.lon, self.zoom)
+        self.centerY = latToTile(self.lat, self.zoom)
+    
+    @property
+    def w(self):
+        return self.baseMap.width
+    @property
+    def h(self):
+        return self.baseMap.height
     
     # Inspired by math contained in https://github.com/dfacts/staticmaplite/
-    def createBaseMap(self):
+    def renderBaseMap(self):
         """Create the map by requesting tiles from the specified tile server."""
         
-        startX = floor(self.centerX - (self.w / self.tileSize) / 2.0)
-        startY = floor(self.centerY - (self.h / self.tileSize) / 2.0)
+        self.baseMap.beginDraw()
+        self.baseMap.background(255)
+        self.baseMap.endDraw()
         
-        endX = ceil(self.centerX + (self.w / self.tileSize) / 2.0)
-        endY = ceil(self.centerY + (self.h / self.tileSize) / 2.0)
+        numColumns = self.w / self.tileSize
+        numRows = self.h / self.tileSize
+        
+        startX = floor(self.centerX - numColumns / 2.0)
+        startY = floor(self.centerY - numRows / 2.0)
+        
+        endX = ceil(self.centerX + numColumns / 2.0)
+        endY = ceil(self.centerY + numRows / 2.0)
         
         self.offsetX = -floor((self.centerX - floor(self.centerX)) * self.tileSize) + \
             floor(self.w / 2.0) + \
@@ -76,27 +107,33 @@ class GeoMap(object):
             floor(self.h / 2.0) + \
             floor(startY - floor(self.centerY)) * self.tileSize
         
-        self.baseMap.beginDraw()
+        def onTileLoaded(tile, meta):
+            self.baseMap.beginDraw()
+            x = meta['destX']
+            y = meta['destY']
+            self.baseMap.image(tile, x, y)
+            self.baseMap.endDraw()
         
         for x in xrange(startX, endX):
             for y in xrange(startY, endY):
+                # Interpolate the URL for this particular tile.
                 # 12/1208/1541.png
                 url = self.url % (self.zoom, x, y)
                 
-                # Request the image and block until we get it.
-                # TODO: Try requestImage() and some callback mechanism.
-                tile = loadImage(url)
-                
+                # Compute the x and y coordinates for where this tile will go on the map.
                 destX = (x - startX) * self.tileSize + self.offsetX
                 destY = (y - startY) * self.tileSize + self.offsetY
                 
-                if tile is not None:
-                    self.baseMap.image(tile, destX, destY)
-                else:
-                    print "Error loading tile at %s" % url
-        
-        self.baseMap.endDraw()
-        
+                # Attempts to load all the images lazily.
+                meta = {
+                    'url' : url,
+                    'destX' : destX,
+                    'destY' : destY,
+                    'x' : x,
+                    'y' : y,
+                    }
+                self.lazyImageManager.addLazyImage(url, onTileLoaded, meta)
+
     def makeGrayscale(self):
         self.baseMap.loadPixels()
         
@@ -110,10 +147,18 @@ class GeoMap(object):
         self.baseMap.noStroke()
         self.baseMap.fill(255, 255, 255, 128)
         self.baseMap.rect(0, 0, width, height)
-    
+
     def draw(self):
         """Draws the base map on the Processing sketch canvas."""
+        
+        self.updateLazyImageLoading()
+        
         image(self.baseMap, 0, 0)
+    
+    def updateLazyImageLoading(self):
+        if self.lazyImageManager.allLazyImagesLoaded:
+            return
+        self.lazyImageManager.request()
     
     def drawMarker(self, markerLat, markerLon, *meta):
         """Draws a circular marker in the main Processing PGraphics space."""
@@ -122,17 +167,11 @@ class GeoMap(object):
         y = self.latToY(markerLat)
         
         ellipse(x, y, 7, 7)
+        text(meta[0], x + 5, y - 5)
     
     def lonToX(self, lon):
-        return floor((self.w / 2.0) - self.tileSize * (self.centerX - lonToTile(lon, self.zoom)))
+        return (self.w / 2.0) - self.tileSize * (self.centerX - lonToTile(lon, self.zoom))
     
     def latToY(self, lat):
-        return floor((self.h / 2.0) - self.tileSize * (self.centerY - latToTile(lat, self.zoom)))
-    
-def lonToTile(lon, zoom):
-    """Given a longitude and zoom value, return the X map tile index."""
-    return ((lon + 180) / 360) * pow(2, zoom)
+        return (self.h / 2.0) - self.tileSize * (self.centerY - latToTile(lat, self.zoom))
 
-def latToTile(lat, zoom):
-    """Given a latitude and zoom value, return the Y map tile index."""
-    return (1 - log(tan(lat * math.pi / 180) + 1 / cos(lat * math.pi / 180)) / math.pi) / 2 * pow(2, zoom)
