@@ -1,6 +1,7 @@
 import geomap
 import rendergeojson
 import renderkml
+import googledirections
 import panner
 
 
@@ -23,12 +24,14 @@ def setup():
 
     # Load some data we want to display over the map.
     loadGeoJsonSample()
-    loadKmlSample()
+    # loadKmlSample()
+    loadGoogleDirectionsSample()
     
     # Actually render the map. Since this is expensive, we want to be explicit about when we render.
     geo.renderBaseMap()
     renderGeoJsonSample()
-    renderKmlSample()
+    # renderKmlSample()
+    renderGoogleDirectionsSample()
     
     # lat, lon coordinates of some test markers.
     global markers
@@ -47,7 +50,8 @@ def draw():
     
     geo.draw()
     drawGeoJsonSample()
-    drawKmlSample()
+    # drawKmlSample()
+    drawGoogleDirectionsSample()
     
     # As long as there are only a few markers, this should work ok.
     fill(255, 0, 0)
@@ -69,10 +73,16 @@ def keyPressed():
         geo.setZoom(geo.zoom - 1)
         renderMap()
 
+
+# -------------------------------------------------------------------------------------
+# Samples
+
+
 def renderMap():
     geo.renderBaseMap()
-    renderKmlSample()
+    # renderKmlSample()
     renderGeoJsonSample()
+    renderGoogleDirectionsSample()
 
 
 # GeoJSON sample using running data exported from mapmyrun.com.
@@ -117,3 +127,27 @@ def renderKmlSample():
 
 def drawKmlSample():
     image(kmlimage, 0, 0)
+
+
+# Google Directions sample
+
+def loadGoogleDirectionsSample():
+    global goodir
+    goodir = googledirections.GoogleDirections('')
+    home = (40.748105,-73.955767)
+    work = (40.740321,-73.993890)
+    goodir.request(home, work, 'driving')
+
+def renderGoogleDirectionsSample():
+    global goodirimg, geo
+    
+    goodirimg = createGraphics(geo.w, geo.h)
+    goodirimg.beginDraw()
+    goodirimg.noFill()
+    goodirimg.stroke(0, 255, 0)
+    goodir.render(geo.lonToX, geo.latToY, goodirimg)
+    goodirimg.endDraw()
+
+def drawGoogleDirectionsSample():
+    image(goodirimg, 0, 0)
+
