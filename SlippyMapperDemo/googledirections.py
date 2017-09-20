@@ -65,6 +65,8 @@ class GoogleDirections(object):
         response_data = res.read()
         
         self.data = json.loads(response_data)
+        self.steps = []
+        
         try:
             self.steps = self.data["routes"][0]["legs"][0]["steps"]
         except:

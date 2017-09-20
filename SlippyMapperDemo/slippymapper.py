@@ -25,8 +25,8 @@ def tileToLat(tile, zoom):
 
 
 
-class GeoMap(object):
-    """GeoMap will draw a map given a location, zoom, and public tile server."""
+class SlippyMapper(object):
+    """SlippyMap will draw a map given a location, zoom, and public tile server."""
     
     # List of public map tile Z/X/Y map tile servers.
     tile_servers = {
@@ -233,5 +233,4 @@ class GeoMap(object):
     def yToLat(self, y):
         tile = (y - (self.h / 2.0)) / self.tileSize + self.centerY
         return tileToLat(tile, self.zoom)
-
 
