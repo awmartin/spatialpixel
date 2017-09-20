@@ -10,12 +10,12 @@ def setup():
 
     global geo
     # Create a new map, centered at Lower Manhattan, but twice the size of the sketch window.
-    geo = geomap.GeoMap(40.714728, -73.998672, 13, width*2, height*2, 'carto-light')
-    
+    geo = geomap.GeoMap(40.714728, -73.998672, 13, width*2, height*2, 'carto-dark')
+
     # Apply some styling to the map in Processing if desired.
     # geo.makeGrayscale()
     # geo.makeFaded()
-    
+
     # Create a panner to provide a convenient panning interaction.
     # Offset the view half the dimensions of the sketch window, since we've made the map
     # twice the size of the sketch window.
@@ -26,13 +26,13 @@ def setup():
     loadGeoJsonSample()
     # loadKmlSample()
     loadGoogleDirectionsSample()
-    
+
     # Actually render the map. Since this is expensive, we want to be explicit about when we render.
     geo.renderBaseMap()
     renderGeoJsonSample()
     # renderKmlSample()
     renderGoogleDirectionsSample()
-    
+
     # lat, lon coordinates of some test markers.
     global markers
     markers = [
@@ -46,18 +46,24 @@ def setup():
 
 def draw():
     background(255)
+
+    pushMatrix()
+
     pan.pan()
-    
     geo.draw()
     drawGeoJsonSample()
     # drawKmlSample()
     drawGoogleDirectionsSample()
-    
+
     # As long as there are only a few markers, this should work ok.
     fill(255, 0, 0)
     noStroke()
     for marker in markers:
         geo.drawMarker(*marker)
+
+    popMatrix()
+
+    drawCoordinates()
 
 def mouseDragged(self):
     pan.drag()
@@ -72,6 +78,16 @@ def keyPressed():
     elif key == "-" or key == "_":
         geo.setZoom(geo.zoom - 1)
         renderMap()
+
+def drawCoordinates():
+    fill(255)
+    noStroke()
+
+    y = mouseY - pan.panY
+    x = mouseX - pan.panX
+    lat = geo.yToLat(y)
+    lon = geo.xToLon(x)
+    text(str(lat) + " x " + str(lon), 15, 25)
 
 
 # -------------------------------------------------------------------------------------
@@ -96,7 +112,7 @@ def loadGeoJsonSample():
 def renderGeoJsonSample():
     global geojsonimage, geo
     geojsonimage = createGraphics(geo.w, geo.h)
-    
+
     geojsonimage.beginDraw()
     geojsonimage.noFill()
     geojsonimage.stroke(255, 0, 0)
@@ -118,7 +134,7 @@ def loadKmlSample():
 def renderKmlSample():
     global kmlimage, geo
     kmlimage = createGraphics(geo.w, geo.h)
-    
+
     kmlimage.beginDraw()
     kmlimage.noFill()
     kmlimage.stroke(255, 0, 0)
@@ -136,11 +152,11 @@ def loadGoogleDirectionsSample():
     goodir = googledirections.GoogleDirections('')
     home = (40.748105,-73.955767)
     work = (40.740321,-73.993890)
-    goodir.request(home, work, 'driving')
+    goodir.request(home, work, 'bicycling')
 
 def renderGoogleDirectionsSample():
     global goodirimg, geo
-    
+
     goodirimg = createGraphics(geo.w, geo.h)
     goodirimg.beginDraw()
     goodirimg.noFill()
@@ -150,4 +166,3 @@ def renderGoogleDirectionsSample():
 
 def drawGoogleDirectionsSample():
     image(goodirimg, 0, 0)
-

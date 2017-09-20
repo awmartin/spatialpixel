@@ -4,11 +4,25 @@ import lazyimages
 
 def lonToTile(lon, zoom):
     """Given a longitude and zoom value, return the X map tile index."""
-    return ((lon + 180.0) / 360.0) * math.pow(2, zoom)
+    n = 2.0 ** zoom
+    return ((lon + 180.0) / 360.0) * n
 
 def latToTile(lat, zoom):
     """Given a latitude and zoom value, return the Y map tile index."""
-    return (1.0 - math.log(math.tan(lat * math.pi / 180.0) + 1.0 / math.cos(lat * math.pi / 180.0)) / math.pi) / 2.0 * math.pow(2, zoom)
+    n = 2.0 ** zoom
+    return (1.0 - math.log(math.tan(lat * math.pi / 180.0) + 1.0 / math.cos(lat * math.pi / 180.0)) / math.pi) / 2.0 * n
+
+def tileToLon(tile, zoom):
+    """Given a tile and zoom, give the longitude."""
+    n = 2.0 ** zoom
+    return tile / n * 360.0 - 180.0
+
+def tileToLat(tile, zoom):
+    """Given a tile and zoom, give the latitude."""
+    n = 2.0 ** zoom
+    lat_rad = math.atan(math.sinh(math.pi * (1.0 - 2.0 * tile / n)))
+    return math.degrees(lat_rad)
+
 
 
 class GeoMap(object):
@@ -174,4 +188,12 @@ class GeoMap(object):
     
     def latToY(self, lat):
         return (self.h / 2.0) - self.tileSize * (self.centerY - latToTile(lat, self.zoom))
+
+    def xToLon(self, x):
+        tile = (x - (self.w / 2.0)) / self.tileSize + self.centerX
+        return tileToLon(tile, self.zoom)
+
+    def yToLat(self, y):
+        tile = (y - (self.h / 2.0)) / self.tileSize + self.centerY
+        return tileToLat(tile, self.zoom)
 
