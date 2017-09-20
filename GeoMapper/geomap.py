@@ -155,19 +155,20 @@ class GeoMap(object):
                     }
                 self.lazyImageManager.addLazyImage(url, onTileLoaded, meta)
 
-    def makeGrayscale(self):
-        self.baseMap.loadPixels()
+    # TODO Revisit map filters.
+    # def makeGrayscale(self):
+    #     self.baseMap.loadPixels()
         
-        for i in xrange(0, self.baseMap.width * self.baseMap.height):
-            b = self.baseMap.brightness(self.baseMap.pixels[i])
-            self.baseMap.pixels[i] = self.baseMap.color(b, b, b)
+    #     for i in xrange(0, self.baseMap.width * self.baseMap.height):
+    #         b = self.baseMap.brightness(self.baseMap.pixels[i])
+    #         self.baseMap.pixels[i] = self.baseMap.color(b, b, b)
         
-        self.baseMap.updatePixels()
+    #     self.baseMap.updatePixels()
     
-    def makeFaded(self):
-        self.baseMap.noStroke()
-        self.baseMap.fill(255, 255, 255, 128)
-        self.baseMap.rect(0, 0, width, height)
+    # def makeFaded(self):
+    #     self.baseMap.noStroke()
+    #     self.baseMap.fill(255, 255, 255, 128)
+    #     self.baseMap.rect(0, 0, width, height)
 
     def draw(self):
         """Draws the base map on the Processing sketch canvas."""

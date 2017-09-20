@@ -1,3 +1,15 @@
+"""Classes for loading images in lazy fashion.
+
+The challenge when using requestImage() from Processing is that it doesn't have a proper
+async callback mechanism. You need to use the draw() loop to continually poll to see if 
+the image has successfully loaded.
+
+The other challenge is loading images in small batches to not send too many requests.
+
+These classes help with both problems.
+
+"""
+
 class LazyImageManager(object):
     def __init__(self, maxInFlight=3):
         self.maxInFlight = maxInFlight
