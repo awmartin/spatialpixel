@@ -90,6 +90,13 @@ class GeoMap(object):
         self.centerX = lonToTile(self.lon, self.zoom)
         self.centerY = latToTile(self.lat, self.zoom)
     
+    def setCenter(self, lat, lon):
+        print "Setting the center to", lat, lon
+        self.lat = lat
+        self.lon = lon
+        self.centerX = lonToTile(self.lon, self.zoom)
+        self.centerY = latToTile(self.lat, self.zoom)
+    
     @property
     def w(self):
         return self.baseMap.width
@@ -196,4 +203,3 @@ class GeoMap(object):
     def yToLat(self, y):
         tile = (y - (self.h / 2.0)) / self.tileSize + self.centerY
         return tileToLat(tile, self.zoom)
-

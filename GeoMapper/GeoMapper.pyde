@@ -65,28 +65,38 @@ def draw():
 
     drawCoordinates()
 
-def mouseDragged(self):
+def mouseDragged():
     pan.drag()
 
 # def mouseWheel(event):
 #     pan.zoom(event)
 
 def keyPressed():
-    if key == "+" or key == "=":
+    lat = geo.yToLat(height / 2 - pan.panY)
+    lon = geo.xToLon(width / 2 - pan.panX)
+
+    if key in ("=", "+"):
+        geo.setCenter(lat, lon)
         geo.setZoom(geo.zoom + 1)
+        pan.reset()
         renderMap()
-    elif key == "-" or key == "_":
+    elif key in ("-", "_"):
+        geo.setCenter(lat, lon)
         geo.setZoom(geo.zoom - 1)
+        pan.reset()
+        renderMap()
+    elif key in ("r", " "):
+        geo.setCenter(lat, lon)
+        pan.reset()
         renderMap()
 
 def drawCoordinates():
     fill(255)
     noStroke()
 
-    y = mouseY - pan.panY
-    x = mouseX - pan.panX
-    lat = geo.yToLat(y)
-    lon = geo.xToLon(x)
+    lat = geo.yToLat(mouseY - pan.panY)
+    lon = geo.xToLon(mouseX - pan.panX)
+
     text(str(lat) + " x " + str(lon), 15, 25)
 
 

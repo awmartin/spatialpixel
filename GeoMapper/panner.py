@@ -1,9 +1,15 @@
 class Panner(object):
     def __init__(self, sketch, x=0, y=0):
         self.sketch = sketch
+        self.originalPanX = x
+        self.originalPanY = y
         self.panX = x
         self.panY = y
         self.zoomFactor = 1.0
+    
+    def reset(self):
+        self.panX = self.originalPanX
+        self.panY = self.originalPanY
     
     def pan(self):
         self.sketch.translate(self.panX, self.panY)
