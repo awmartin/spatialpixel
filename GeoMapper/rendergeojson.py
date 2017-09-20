@@ -1,6 +1,47 @@
 import json
 
+class Layer(object):
+    def __init__(self, filename, strokeColor=color(255,0,0), fillColor=None):
+        self.filename = filename
+        self.strokeColor = strokeColor
+        self.fillColor = fillColor
+        
+        self.layerObject = RenderGeoJson.open(filename)
+        self.underlayMap = None
+    
+    def setUnderlayMap(self, geomap):
+        self.underlayMap = geomap
+
+    def render(self):
+        self.layer = createGraphics(self.underlayMap.w, self.underlayMap.h)
+        self.layer.beginDraw()
+        
+        if self.fillColor is not None:
+            self.layer.fill(self.fillColor)
+        else:
+            self.layer.noFill()
+        
+        if self.strokeColor is not None:
+            self.layer.stroke(self.strokeColor)
+        else:
+            self.layer.noStroke()    
+        
+        self.layerObject.render(self.underlayMap.lonToX, self.underlayMap.latToY, self.layer)
+        
+        self.layer.endDraw()
+    
+    def draw(self):
+        image(self.layer, 0, 0)
+
+
 class RenderGeoJson(object):
+    @classmethod
+    def open(self, filename):
+        with open(filename) as f:
+            geojson = RenderGeoJson(f)
+        geojson.parse()
+        return geojson
+    
     def __init__(self, file):
         self.data = json.load(file)
         
@@ -61,5 +102,4 @@ class GeoJsonLineString(object):
             
         s.endShape()
         pgraphics.shape(s, 0, 0)
-
 

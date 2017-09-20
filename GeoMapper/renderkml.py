@@ -1,10 +1,50 @@
 import xml.etree.ElementTree as ET
 
+class Layer(object):
+    def __init__(self, filename, strokeColor=color(255,0,0), fillColor=None):
+        self.filename = filename
+        self.strokeColor = strokeColor
+        self.fillColor = fillColor
+        
+        self.layerObject = RenderKML.open(filename)
+        self.underlayMap = None
+    
+    def setUnderlayMap(self, geomap):
+        self.underlayMap = geomap
+
+    def render(self):
+        self.layer = createGraphics(self.underlayMap.w, self.underlayMap.h)
+        self.layer.beginDraw()
+        
+        if self.fillColor is not None:
+            self.layer.fill(self.fillColor)
+        else:
+            self.layer.noFill()
+        
+        if self.strokeColor is not None:
+            self.layer.stroke(self.strokeColor)
+        else:
+            self.layer.noStroke()    
+        
+        self.layerObject.render(self.underlayMap.lonToX, self.underlayMap.latToY, self.layer)
+        
+        self.layer.endDraw()
+    
+    def draw(self):
+        image(self.layer, 0, 0)
+
+
 class RenderKML(object):
+    @classmethod
+    def open(self, filename):
+        with open(filename) as f:
+            kml = RenderKML(f)
+        kml.parse()
+        return kml
+        
     def __init__(self, xmlfile):
         self.tree = ET.parse(xmlfile)
         self.elts = []
-        self.pgraphics = None
     
     def parse(self):
         root = self.tree.getroot()  # <kml>
@@ -76,5 +116,4 @@ class KmlWayPoint(object):
         x = lonToX(self.pt[0])
         y = latToY(self.pt[1])
         pgraphics.ellipse(x, y, 5, 5)
-
 

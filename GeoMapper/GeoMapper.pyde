@@ -1,14 +1,26 @@
 import geomap
 import panner
-import samples
+
+import renderkml
+import rendergeojson
+import googledirections
 
 
 def setup():
     size(1000, 800, P2D)
 
-    global geo
     # Create a new map, centered at Lower Manhattan, but twice the size of the sketch window.
+    global geo
     geo = geomap.GeoMap(40.714728, -73.998672, 13, width*2, height*2, 'carto-dark')
+    
+    # Add some layers to the map. Don't add too many of these.
+    # geo.addLayer(rendergeojson.Layer("route1762551746.geojson"))
+    geo.addLayer(renderkml.Layer("location-history.kml"))
+    
+    googleApiKey = ''
+    home = (40.748105,-73.955767)
+    work = (40.740321,-73.993890)
+    # geo.addLayer(googledirections.Layer(googleApiKey, home, work, mode='bicycling'))
 
     # Create a panner to provide a convenient panning interaction.
     # Offset the view half the dimensions of the sketch window, since we've made the map
@@ -16,50 +28,29 @@ def setup():
     global pan
     pan = panner.Panner(this, x=-width/2, y=-height/2)
 
-    # Load some data we want to display over the map.
-    samples.loadGeoJsonSample()
-    # samples.loadKmlSample()
-    samples.loadGoogleDirectionsSample()
-
     # Actually render the map. Since this is expensive, we want to be explicit about when we render.
-    renderMap()
+    geo.render()
 
     # lat, lon coordinates of some test markers.
-    global markers
+    redColor = color(255,0,0)
     markers = [
-        (40.714728, -73.998672, "Center"),
-        (40.689220, -74.044359, "Statue of Liberty"),
-        (40.808287, -73.960808, "Avery GSAPP"),
-        (40.792039, -73.886967, "Rikers Island"),
-        (40.748401, -73.985801, "Empire State Building"),
-        (40.660212, -73.968962, "Prospect Park"),
+        (40.714728, -73.998672, "Center", redColor),
+        (40.689220, -74.044359, "Statue of Liberty", redColor),
+        (40.808287, -73.960808, "Avery GSAPP", redColor),
+        (40.792039, -73.886967, "Rikers Island", redColor),
+        (40.748401, -73.985801, "Empire State Building", redColor),
+        (40.660212, -73.968962, "Prospect Park", redColor),
         ]
-
-def renderMap():
-    """Render all the maps and samples."""
-    
-    global geo
-    geo.renderBaseMap()
-    
-    samples.renderGeoJsonSample(geo)
-    # samples.renderKmlSample(geo)
-    samples.renderGoogleDirectionsSample(geo)
+    for marker in markers:
+        geo.addMarker(marker)
 
 
 def draw():
     background(255)
 
     pushMatrix()
-
     pan.pan()
     geo.draw()
-    
-    samples.drawGeoJsonSample()
-    # samples.drawKmlSample()
-    samples.drawGoogleDirectionsSample()
-
-    drawMarkers()
-    
     popMatrix()
 
     drawCoordinates()
@@ -76,16 +67,16 @@ def keyPressed():
         geo.setCenter(lat, lon)
         geo.setZoom(geo.zoom + 1)
         pan.reset()
-        renderMap()
+        geo.render()
     elif key in ("-", "_"):
         geo.setCenter(lat, lon)
         geo.setZoom(geo.zoom - 1)
         pan.reset()
-        renderMap()
+        geo.render()
     elif key in ("r", " "):
         geo.setCenter(lat, lon)
         pan.reset()
-        renderMap()
+        geo.render()
 
 def drawCoordinates():
     fill(255)
@@ -95,10 +86,3 @@ def drawCoordinates():
     lon = geo.xToLon(mouseX - pan.panX)
 
     text(str(lat) + " x " + str(lon), 15, 25)
-
-def drawMarkers():
-    # As long as there are only a few markers, this should work ok.
-    fill(255, 0, 0)
-    noStroke()
-    for marker in markers:
-        geo.drawMarker(*marker)

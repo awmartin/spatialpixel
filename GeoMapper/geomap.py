@@ -83,6 +83,8 @@ class GeoMap(object):
         self.offsetY = floor((floor(self.centerY) - self.centerY) * self.tileSize)
         
         self.lazyImageManager = lazyimages.LazyImageManager()
+        self.layers = []
+        self.markers = []
     
     def setZoom(self, zoom):
         print "Setting zoom to", zoom
@@ -105,7 +107,7 @@ class GeoMap(object):
         return self.baseMap.height
     
     # Inspired by math contained in https://github.com/dfacts/staticmaplite/
-    def renderBaseMap(self):
+    def render(self):
         """Create the map by requesting tiles from the specified tile server."""
         
         self.baseMap.beginDraw()
@@ -154,6 +156,10 @@ class GeoMap(object):
                     'y' : y,
                     }
                 self.lazyImageManager.addLazyImage(url, onTileLoaded, meta)
+        
+        # Kick off all the layer rendering.
+        for layer in self.layers:
+            layer.render()
 
     # TODO Revisit map filters.
     # def makeGrayscale(self):
@@ -176,6 +182,12 @@ class GeoMap(object):
         self.updateLazyImageLoading()
         
         image(self.baseMap, 0, 0)
+        
+        for layer in self.layers:
+            layer.draw()
+        
+        for marker in self.markers:
+            self.drawMarker(*marker)
     
     def updateLazyImageLoading(self):
         if self.lazyImageManager.allLazyImagesLoaded:
@@ -188,9 +200,26 @@ class GeoMap(object):
         x = self.lonToX(markerLon)
         y = self.latToY(markerLat)
         
+        if len(meta) >= 1:
+            title = meta[0]
+        else:
+            title = None
+        if len(meta) >= 2:
+            fill(meta[1])
+        else:
+            fill(255)
+        
         ellipse(x, y, 7, 7)
-        text(meta[0], x + 5, y - 5)
+        if title is not None:
+            text(title, x + 5, y - 5)
     
+    def addLayer(self, layer):
+        self.layers.append(layer)
+        layer.setUnderlayMap(self)
+    
+    def addMarker(self, marker):
+        self.markers.append(marker)
+        
     def lonToX(self, lon):
         return (self.w / 2.0) - self.tileSize * (self.centerX - lonToTile(lon, self.zoom))
     
@@ -204,3 +233,5 @@ class GeoMap(object):
     def yToLat(self, y):
         tile = (y - (self.h / 2.0)) / self.tileSize + self.centerY
         return tileToLat(tile, self.zoom)
+
+
