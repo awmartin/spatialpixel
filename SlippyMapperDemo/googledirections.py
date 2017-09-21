@@ -1,7 +1,8 @@
 import httplib
 import json
 
-class Layer(object):
+
+class SlippyLayer(object):
     def __init__(self, apiKey, startLocation, endLocation, mode='driving', strokeColor=color(255,0,0), fillColor=None):
         self.apiKey = apiKey
         self.startLocation = startLocation
@@ -19,7 +20,7 @@ class Layer(object):
         self.underlayMap = geomap
     
     def render(self):
-        self.layer = createGraphics(self.underlayMap.w, self.underlayMap.h)
+        self.layer = createGraphics(self.underlayMap.width, self.underlayMap.height)
         self.layer.beginDraw()
         
         if self.fillColor is not None:
@@ -30,7 +31,9 @@ class Layer(object):
         if self.strokeColor is not None:
             self.layer.stroke(self.strokeColor)
         else:
-            self.layer.noStroke()    
+            self.layer.noStroke()
+        
+        self.layer.strokeWeight(1.5)
         
         self.layerObject.render(self.underlayMap.lonToX, self.underlayMap.latToY, self.layer)
         
@@ -38,6 +41,7 @@ class Layer(object):
     
     def draw(self):
         image(self.layer, 0, 0)
+
 
 class GoogleDirections(object):
     def __init__(self, api_key):

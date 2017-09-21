@@ -1,6 +1,6 @@
 import json
 
-class Layer(object):
+class SlippyLayer(object):
     def __init__(self, filename, strokeColor=color(255,0,0), fillColor=None):
         self.filename = filename
         self.strokeColor = strokeColor
@@ -13,7 +13,7 @@ class Layer(object):
         self.underlayMap = geomap
 
     def render(self):
-        self.layer = createGraphics(self.underlayMap.w, self.underlayMap.h)
+        self.layer = createGraphics(self.underlayMap.width, self.underlayMap.height)
         self.layer.beginDraw()
         
         if self.fillColor is not None:
@@ -102,4 +102,3 @@ class GeoJsonLineString(object):
             
         s.endShape()
         pgraphics.shape(s, 0, 0)
-

@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-class Layer(object):
+class SlippyLayer(object):
     def __init__(self, filename, strokeColor=color(255,0,0), fillColor=None):
         self.filename = filename
         self.strokeColor = strokeColor
@@ -13,7 +13,7 @@ class Layer(object):
         self.underlayMap = geomap
 
     def render(self):
-        self.layer = createGraphics(self.underlayMap.w, self.underlayMap.h)
+        self.layer = createGraphics(self.underlayMap.width, self.underlayMap.height)
         self.layer.beginDraw()
         
         if self.fillColor is not None:
@@ -116,4 +116,3 @@ class KmlWayPoint(object):
         x = lonToX(self.pt[0])
         y = latToY(self.pt[1])
         pgraphics.ellipse(x, y, 5, 5)
-

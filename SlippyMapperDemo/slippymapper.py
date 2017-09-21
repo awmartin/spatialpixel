@@ -1,6 +1,41 @@
 import math
 import lazyimages
 
+# List of public map tile Z/X/Y map tile servers.
+tile_servers = {
+    # http://maps.stamen.com/
+    'toner'              : "http://tile.stamen.com/toner/%s/%s/%s.png",
+    'toner-lines'        : "http://tile.stamen.com/toner-lines/%s/%s/%s.png",
+    'toner-hybrid'       : "http://tile.stamen.com/toner-hybrid/%s/%s/%s.png",
+    'toner-background'   : "http://tile.stamen.com/toner-background/%s/%s/%s.png",
+    'toner-lite'         : "http://tile.stamen.com/toner-lite/%s/%s/%s.png",
+    'terrain'            : "http://tile.stamen.com/terrain/%s/%s/%s.png",
+    'terrain-lines'      : "http://tile.stamen.com/terrain-lines/%s/%s/%s.png",
+    'terrain-background' : "http://tile.stamen.com/terrain-background/%s/%s/%s.png",
+    'watercolor'         : "http://tile.stamen.com/watercolor/%s/%s/%s.png",
+    
+    # Found in https://github.com/dfacts/staticmaplite/blob/master/staticmap.php
+    'mapnik'             : "http://tile.openstreetmap.org/%s/%s/%s.png",
+    'cycle'              : "http://a.tile.opencyclemap.org/cycle/%s/%s/%s.png",
+    
+    # http://wiki.openstreetmap.org/wiki/Tile_servers
+    'openstreetmap'      : "http://a.tile.openstreetmap.org/%s/%s/%s.png", # also http://b.* and https://c.*
+    'wikimedia'          : "https://maps.wikimedia.org/osm-intl/%s/%s/%s.png",
+    'carto-light'        : "http://a.basemaps.cartocdn.com/light_all/%s/%s/%s.png",
+    'carto-dark'         : "http://a.basemaps.cartocdn.com/dark_all/%s/%s/%s.png",
+    'openptmap'          : "http://www.openptmap.org/tiles/%s/%s/%s.png",
+    'hikebike'           : "http://a.tiles.wmflabs.org/hikebike/%s/%s/%s.png",
+    
+    # https://carto.com/location-data-services/basemaps/
+    # Note: These seem to be really slow.
+    'carto-lightall'     : "http://cartodb-basemaps-1.global.ssl.fastly.net/light_all/%s/%s/%s.png",
+    'carto-darkall'      : "http://cartodb-basemaps-1.global.ssl.fastly.net/dark_all/%s/%s/%s.png",
+    'carto-lightnolabels': "http://cartodb-basemaps-1.global.ssl.fastly.net/light_nolabels/%s/%s/%s.png",
+    'carto-darknolabels' : "http://cartodb-basemaps-1.global.ssl.fastly.net/dark_nolabels/%s/%s/%s.png",
+    }
+
+
+# Fundamental transformations. Reference: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
 def lonToTile(lon, zoom):
     """Given a longitude and zoom value, return the X map tile index."""
@@ -10,7 +45,8 @@ def lonToTile(lon, zoom):
 def latToTile(lat, zoom):
     """Given a latitude and zoom value, return the Y map tile index."""
     n = 2.0 ** zoom
-    return (1.0 - math.log(math.tan(lat * math.pi / 180.0) + 1.0 / math.cos(lat * math.pi / 180.0)) / math.pi) / 2.0 * n
+    lat_rad = math.radians(lat)
+    return (1.0 - math.log(math.tan(lat_rad) + (1 / math.cos(lat_rad))) / math.pi) / 2.0 * n
 
 def tileToLon(tile, zoom):
     """Given a tile and zoom, give the longitude."""
@@ -24,54 +60,20 @@ def tileToLat(tile, zoom):
     return math.degrees(lat_rad)
 
 
-
 class SlippyMapper(object):
     """SlippyMap will draw a map given a location, zoom, and public tile server."""
-    
-    # List of public map tile Z/X/Y map tile servers.
-    tile_servers = {
-        # http://maps.stamen.com/
-        'toner'              : "http://tile.stamen.com/toner/%s/%s/%s.png",
-        'toner-lines'        : "http://tile.stamen.com/toner-lines/%s/%s/%s.png",
-        'toner-hybrid'       : "http://tile.stamen.com/toner-hybrid/%s/%s/%s.png",
-        'toner-background'   : "http://tile.stamen.com/toner-background/%s/%s/%s.png",
-        'toner-lite'         : "http://tile.stamen.com/toner-lite/%s/%s/%s.png",
-        'terrain'            : "http://tile.stamen.com/terrain/%s/%s/%s.png",
-        'terrain-lines'      : "http://tile.stamen.com/terrain-lines/%s/%s/%s.png",
-        'terrain-background' : "http://tile.stamen.com/terrain-background/%s/%s/%s.png",
-        'watercolor'         : "http://tile.stamen.com/watercolor/%s/%s/%s.png",
-        
-        # Found in https://github.com/dfacts/staticmaplite/blob/master/staticmap.php
-        'mapnik'             : "http://tile.openstreetmap.org/%s/%s/%s.png",
-        'cycle'              : "http://a.tile.opencyclemap.org/cycle/%s/%s/%s.png",
-        
-        # http://wiki.openstreetmap.org/wiki/Tile_servers
-        'openstreetmap'      : "http://a.tile.openstreetmap.org/%s/%s/%s.png", # also http://b.* and https://c.*
-        'wikimedia'          : "https://maps.wikimedia.org/osm-intl/%s/%s/%s.png",
-        'carto-light'         : "http://a.basemaps.cartocdn.com/light_all/%s/%s/%s.png",
-        'carto-dark'          : "http://a.basemaps.cartocdn.com/dark_all/%s/%s/%s.png",
-        'openptmap'          : "http://www.openptmap.org/tiles/%s/%s/%s.png",
-        'hikebike'           : "http://a.tiles.wmflabs.org/hikebike/%s/%s/%s.png",
-        
-        # https://carto.com/location-data-services/basemaps/
-        # Note: These seem to be really slow.
-        'carto-lightall'     : "http://cartodb-basemaps-1.global.ssl.fastly.net/light_all/%s/%s/%s.png",
-        'carto-darkall'      : "http://cartodb-basemaps-1.global.ssl.fastly.net/dark_all/%s/%s/%s.png",
-        'carto-lightnolabels': "http://cartodb-basemaps-1.global.ssl.fastly.net/light_nolabels/%s/%s/%s.png",
-        'carto-darknolabels' : "http://cartodb-basemaps-1.global.ssl.fastly.net/dark_nolabels/%s/%s/%s.png",
-        }
     
     tileSize = 256.0
     
     def __init__(self, lat, lon, zoom, w, h, server='toner'):
         self.baseMap = createGraphics(floor(w), floor(h))
         
-        if server in self.tile_servers:
-            self.url = self.tile_servers[server]
+        if server in tile_servers:
+            self.url = tile_servers[server]
         else:
             print "Got %s as a tile server but that didn't exist. Available servers are %s. Falling back to 'toner'." % \
-                (server, ", ".join(self.tile_servers.keys()))
-            self.url = self.tile_servers['toner']
+                (server, ", ".join(tile_servers.keys()))
+            self.url = tile_servers['toner']
         
         self.lat = lat
         self.lon = lon
@@ -100,10 +102,10 @@ class SlippyMapper(object):
         self.centerY = latToTile(self.lat, self.zoom)
     
     @property
-    def w(self):
+    def width(self):
         return self.baseMap.width
     @property
-    def h(self):
+    def height(self):
         return self.baseMap.height
     
     # Inspired by math contained in https://github.com/dfacts/staticmaplite/
@@ -114,8 +116,8 @@ class SlippyMapper(object):
         self.baseMap.background(255)
         self.baseMap.endDraw()
         
-        numColumns = self.w / self.tileSize
-        numRows = self.h / self.tileSize
+        numColumns = self.width / self.tileSize
+        numRows = self.height / self.tileSize
         
         startX = floor(self.centerX - numColumns / 2.0)
         startY = floor(self.centerY - numRows / 2.0)
@@ -124,10 +126,10 @@ class SlippyMapper(object):
         endY = ceil(self.centerY + numRows / 2.0)
         
         self.offsetX = -floor((self.centerX - floor(self.centerX)) * self.tileSize) + \
-            floor(self.w / 2.0) + \
+            floor(self.width / 2.0) + \
             floor(startX - floor(self.centerX)) * self.tileSize
         self.offsetY = -floor((self.centerY - floor(self.centerY)) * self.tileSize) + \
-            floor(self.h / 2.0) + \
+            floor(self.height / 2.0) + \
             floor(startY - floor(self.centerY)) * self.tileSize
         
         def onTileLoaded(tile, meta):
@@ -193,44 +195,40 @@ class SlippyMapper(object):
         if self.lazyImageManager.allLazyImagesLoaded:
             return
         self.lazyImageManager.request()
-    
-    def drawMarker(self, markerLat, markerLon, *meta):
+
+    def addMarker(self, markerLat, markerLon, markerColor=None, markerTitle=None):
+        marker = (markerLat, markerLon, markerColor, markerTitle)
+        self.markers.append(marker)
+        
+    def drawMarker(self, markerLat, markerLon, markerColor=None, markerTitle=None):
         """Draws a circular marker in the main Processing PGraphics space."""
         
         x = self.lonToX(markerLon)
         y = self.latToY(markerLat)
         
-        if len(meta) >= 1:
-            title = meta[0]
-        else:
-            title = None
-        if len(meta) >= 2:
-            fill(meta[1])
-        else:
-            fill(255)
+        if markerColor is not None:
+            fill(markerColor)
         
         ellipse(x, y, 7, 7)
-        if title is not None:
-            text(title, x + 5, y - 5)
+        
+        if markerTitle is not None:
+            text(markerTitle, x + 5, y - 5)
     
     def addLayer(self, layer):
         self.layers.append(layer)
         layer.setUnderlayMap(self)
     
-    def addMarker(self, marker):
-        self.markers.append(marker)
         
     def lonToX(self, lon):
-        return (self.w / 2.0) - self.tileSize * (self.centerX - lonToTile(lon, self.zoom))
+        return (self.width / 2.0) - self.tileSize * (self.centerX - lonToTile(lon, self.zoom))
     
     def latToY(self, lat):
-        return (self.h / 2.0) - self.tileSize * (self.centerY - latToTile(lat, self.zoom))
+        return (self.height / 2.0) - self.tileSize * (self.centerY - latToTile(lat, self.zoom))
 
     def xToLon(self, x):
-        tile = (x - (self.w / 2.0)) / self.tileSize + self.centerX
+        tile = (x - (self.width / 2.0)) / self.tileSize + self.centerX
         return tileToLon(tile, self.zoom)
 
     def yToLat(self, y):
-        tile = (y - (self.h / 2.0)) / self.tileSize + self.centerY
+        tile = (y - (self.height / 2.0)) / self.tileSize + self.centerY
         return tileToLat(tile, self.zoom)
-
