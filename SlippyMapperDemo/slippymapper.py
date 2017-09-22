@@ -189,7 +189,7 @@ class SlippyMapper(object):
             layer.draw()
         
         for marker in self.markers:
-            self.drawMarker(*marker)
+            marker.draw()
     
     def updateLazyImageLoading(self):
         if self.lazyImageManager.allLazyImagesLoaded:
@@ -197,28 +197,32 @@ class SlippyMapper(object):
         self.lazyImageManager.request()
 
     def addMarker(self, markerLat, markerLon, markerColor=None, markerTitle=None):
-        marker = (markerLat, markerLon, markerColor, markerTitle)
+        marker = SlippyMarker(markerLat, markerLon, markerColor, markerTitle)
+        marker.setUnderlayMap(self)
         self.markers.append(marker)
-        
-    def drawMarker(self, markerLat, markerLon, markerColor=None, markerTitle=None):
-        """Draws a circular marker in the main Processing PGraphics space."""
-        
-        x = self.lonToX(markerLon)
-        y = self.latToY(markerLat)
-        
-        if markerColor is not None:
-            fill(markerColor)
-        
-        ellipse(x, y, 7, 7)
-        
-        if markerTitle is not None:
-            text(markerTitle, x + 5, y - 5)
     
     def addLayer(self, layer):
         self.layers.append(layer)
         layer.setUnderlayMap(self)
     
+    def save(self, filename):
+        self.flattened().save(filename)
+
+    def flattened(self):
+        export = createGraphics(self.width, self.height)
+        export.beginDraw()
         
+        export.image(self.baseMap, 0, 0)
+        
+        for layer in self.layers:
+            export.image(layer.layer, 0, 0)
+            
+        for marker in self.markers:
+            marker.draw(export)
+        
+        export.endDraw()
+        return export
+
     def lonToX(self, lon):
         return (self.width / 2.0) - self.tileSize * (self.centerX - lonToTile(lon, self.zoom))
     
@@ -232,3 +236,33 @@ class SlippyMapper(object):
     def yToLat(self, y):
         tile = (y - (self.height / 2.0)) / self.tileSize + self.centerY
         return tileToLat(tile, self.zoom)
+
+
+class SlippyMarker(object):
+    def __init__(self, markerLat, markerLon, markerColor=None, markerTitle=None):
+        self.markerLat = markerLat
+        self.markerLon = markerLon
+        self.markerColor = markerColor
+        self.markerTitle = markerTitle
+
+    def setUnderlayMap(self, m):
+        self.underlayMap = m
+
+    def draw(self, pgraphics=None):
+        x = self.underlayMap.lonToX(self.markerLon)
+        y = self.underlayMap.latToY(self.markerLat)
+        
+        if pgraphics is None:
+            if self.markerColor is not None:
+                fill(self.markerColor)
+            ellipse(x, y, 7, 7)
+            if self.markerTitle is not None:
+                text(self.markerTitle, x + 5, y - 5)
+        
+        else:
+            if self.markerColor is not None:
+                pgraphics.fill(self.markerColor)
+            pgraphics.ellipse(x, y, 7, 7)
+            if self.markerTitle is not None:
+                pgraphics.text(self.markerTitle, x + 5, y - 5)
+

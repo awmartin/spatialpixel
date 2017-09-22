@@ -31,6 +31,12 @@ class LazyImageManager(object):
         for lazyImage in self.allImages:
             lazyImage.check()
 
+    def _requestNextImage(self):
+        if self.numInQueue == 0:
+            return
+        nextImage = self.lazyImageQueue[0]
+        nextImage.request()
+
     @property
     def allLazyImagesLoaded(self):
         return self.numTotal > 0 and self.numTotal == self.numLoaded
@@ -63,12 +69,6 @@ class LazyImageManager(object):
     def numLoaded(self):
         return len(self.imagesLoaded)
     
-    def _requestNextImage(self):
-        if self.numInQueue == 0:
-            return
-        nextImage = self.lazyImageQueue[0]
-        nextImage.request()
-
 
 class LazyImage(object):
     """Class to load images lazily using the dumb Processing.py requestImage() function.

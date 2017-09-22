@@ -1,16 +1,17 @@
 import json
 
 class SlippyLayer(object):
-    def __init__(self, filename, strokeColor=color(255,0,0), fillColor=None):
+    def __init__(self, filename, strokeColor=color(255,0,0), fillColor=None, styler=None):
         self.filename = filename
         self.strokeColor = strokeColor
         self.fillColor = fillColor
+        self.styler = styler
         
         self.layerObject = RenderGeoJson.open(filename)
         self.underlayMap = None
     
-    def setUnderlayMap(self, geomap):
-        self.underlayMap = geomap
+    def setUnderlayMap(self, m):
+        self.underlayMap = m
 
     def render(self):
         self.layer = createGraphics(self.underlayMap.width, self.underlayMap.height)
@@ -64,6 +65,8 @@ class RenderGeoJson(object):
                         self.addElement(GeoJsonPolygon(pts))
             elif geoType == "LineString":
                 self.addElement(GeoJsonLineString(coords))
+            elif geoType == "Point":
+                self.addElement(GeoJsonPoint(coords))
     
     def render(self, lonToX, latToY, pgraphics):
         for elt in self._elts:
@@ -102,3 +105,11 @@ class GeoJsonLineString(object):
             
         s.endShape()
         pgraphics.shape(s, 0, 0)
+
+class GeoJsonPoint(object):
+    def __init__(self, pt):
+        self.pt = pt
+    
+    def draw(self, lonToX, latToY, pgraphics):
+        lon, lat = self.pt[0], self.pt[1]
+        pgraphics.ellipse(lonToX(lon), latToY(lat), 3, 3)

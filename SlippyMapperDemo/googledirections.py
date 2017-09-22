@@ -16,8 +16,8 @@ class SlippyLayer(object):
         
         self.layerObject.request(self.startLocation, self.endLocation, self.mode)
     
-    def setUnderlayMap(self, geomap):
-        self.underlayMap = geomap
+    def setUnderlayMap(self, m):
+        self.underlayMap = m
     
     def render(self):
         self.layer = createGraphics(self.underlayMap.width, self.underlayMap.height)

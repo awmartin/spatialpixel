@@ -9,8 +9,8 @@ class SlippyLayer(object):
         self.layerObject = RenderKML.open(filename)
         self.underlayMap = None
     
-    def setUnderlayMap(self, geomap):
-        self.underlayMap = geomap
+    def setUnderlayMap(self, m):
+        self.underlayMap = m
 
     def render(self):
         self.layer = createGraphics(self.underlayMap.width, self.underlayMap.height)
