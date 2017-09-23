@@ -19,7 +19,7 @@ scale(2, -2)
 # 2010/11/02,06:39:55.6,-5.378,151.545,5.8, 41
 # 2010/11/02,03:36:54.2,12.979,-91.224,4.9, 60
 
-with open("data.csv") as f:
+with open("quakes.csv") as f:
     reader = csv.reader(f)
     header = reader.next() # Skip the header row.
     
@@ -28,4 +28,3 @@ with open("data.csv") as f:
         lat = float(row[2])
         
         ellipse(lon, lat, 2, 2)
-
