@@ -6,7 +6,7 @@ fill(255, 0, 0)
 noStroke()
 
 
-worldmap = loadImage("https://spatialpixel.s3.amazonaws.com/maps/worldmap-equirectangular-720px.png")
+worldmap = loadImage("https://s3.amazonaws.com/spatialpixel/maps/worldmap-equirectangular-720px.png")
 image(worldmap, (width - worldmap.width)/2, (height - worldmap.height)/2)
 print worldmap.width, worldmap.height
 

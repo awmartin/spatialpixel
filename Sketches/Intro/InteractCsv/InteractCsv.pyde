@@ -8,7 +8,7 @@ def setup():
     size(1000, 700)
 
     global worldmap
-    worldmap = loadImage("https://spatialpixel.s3.amazonaws.com/maps/worldmap-equirectangular-720px.png")
+    worldmap = loadImage("https://s3.amazonaws.com/spatialpixel/maps/worldmap-equirectangular-720px.png")
 
     global quakes
     quakes = []
