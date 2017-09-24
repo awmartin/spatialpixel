@@ -9,7 +9,7 @@ These sketches are written in Python and [Processing](http://processing.org) 3+,
 
 _More to come..._
 
-1. First, download a modified version of Python Mode for Processing that provides Python library support.
+1. First, [download a modified version of Python Mode for Processing that provides Python library support](https://github.com/awmartin/processing.py/releases/tag/3026-library-folder.1).
 2. Create a `libraries_python` folder in your sketchbook.
 3. Clone this repo into a new subfolder of that folder.
 
