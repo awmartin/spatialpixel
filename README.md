@@ -1,25 +1,62 @@
 # Spatial Pixel Code
 
-This repository hosts code featured at [Spatial Pixel](http://spatialpixel.com).
+This repository hosts libraries and code featured at [Spatial Pixel](http://spatialpixel.com),
+consisting of functionality for computational designers.
 
-The code is organized loosely by topic, where top-level folders indicate the area the
-contained sketches demonstrate, and those sometimes have subtopics, like 'Biomimicry.'
+These sketches are written in Python and [Processing](http://processing.org) 3+, in both the Python and Java modes.
 
-## Languages
+## Using These Libraries
 
-These sketches are currently written in Python and [Processing](http://processing.org) 3+, in both the Python and Java modes.
+_More to come..._
 
-## Processing Libraries
+1. First, download a modified version of Python Mode for Processing that provides Python library support.
+2. Create a `libraries_python` folder in your sketchbook.
+3. Clone this repo into a new subfolder of that folder.
 
-The folder in the repo called `libraries` contains descriptions of where to download the
-Processing library referenced, so you can download them and copy them into your
-sketchbook's `libraries` folder.
+    $ cd libraries_python
+    $ git clone https://github.com/awmartin/spatialpixel
+
+The structure should look like this:
+
+    YOUR SKETCHBOOK/
+      |- ...
+      |
+      |- libraries/
+      |- libraries_python/
+      |   |- spatialpixel/
+      |- modes/
+      |   |- PythonMode
+      |
+      |- ...
+
+Start Processing in Python Mode and you should be good to go.
+
+## Available Libraries and Components
+
+- data
+  - kml
+  - geojson
+- google
+  - directions
+  - streetview
+- mapping
+  - slippymapper
+- path
+  - randomwalk
+- ui
+  - button
+  - control
+  - interface
+  - panner
+  - text
+  - toggle
+- util
+  - lazyimages
 
 ## Contributing
 
-If you'd like to contribute, please fork the repo and send a pull request with
-a nice commit message. Screenshots are great. :)
+If you'd like to contribute, please fork the repo, create a new branch, and send a pull request with a descriptive message. Screenshots are very helpful. :)
 
 ## License
 
-MIT License. See LICENSE.txt.
+MIT License. See [LICENSE.txt](LICENSE.txt).
