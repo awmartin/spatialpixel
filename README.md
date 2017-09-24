@@ -7,14 +7,14 @@ These sketches are written in Python and [Processing](http://processing.org) 3+,
 
 ## Using These Libraries
 
-_More to come..._
+1. Ensure you have Python mode release 3027 or later. (See note below if 3027 isn't yet available.)
+2. It will create a `site-packages` folder in your `libraries` folder. This is where your Python dependencies can live (.py files) to be shared among all your Python mode sketches.
+3. Clone this repo into a new subfolder of `site-packages`.
 
-1. First, [download a modified version of Python Mode for Processing that provides Python library support](https://github.com/awmartin/processing.py/releases/tag/3026-library-folder.1).
-2. Create a `libraries_python` folder in your sketchbook.
-3. Clone this repo into a new subfolder of that folder.
-
-    $ cd libraries_python
+    $ cd libraries/site-packages
     $ git clone https://github.com/awmartin/spatialpixel
+
+Alternatively, for step 3, you can download the archive of this repo and unzip it into `site-packages`. You'll have to come back periodically to download updates this way if you're not familiar with git.
 
 The structure should look like this:
 
@@ -22,10 +22,9 @@ The structure should look like this:
       |- ...
       |
       |- libraries/
-      |- libraries_python/
-      |   |- spatialpixel/
-      |- modes/
-      |   |- PythonMode
+      |   |- site-packages/
+      |       |- spatialpixel/
+      |       |- ...
       |
       |- ...
 
@@ -53,14 +52,34 @@ Start Processing in Python Mode and you should be good to go.
 - util
   - lazyimages
 
-## Using the code without the modified Python Mode
+## Other ways to use the code
 
-The problem with using the modified Python mode is that the Processing IDE will tempt you into upgrading when there are new "official" releases of Python mode. Until I can lobby to get the library support into the official code line, there are two ways to use the code.
+If you want to experiment with hacking at a library or component, one way is to copy/paste individual files into your sketches. You can also follow the contribution guidelines below and send pull requests.
 
-1. Use the modified Python mode.
-2. Copy/paste individual files into your sketches and import them.
+### Before Version 3027 is officially released...
 
-With the second option, you might need to hack the import statements in the files according to your sketch's structure, which can be a bit tedious but shouldn't be too difficult. I recommend the first option.
+If 3027 hasn't been released yet, I've created an archive you can use in the meantime. [Download it here.](https://s3.amazonaws.com/spatialpixel/releases/PythonMode.zip)
+
+To use, quit Processing and move any pre-existing PythonMode folder in the `modes` folder into a subfolder called `old`. This is just to back it up in case something goes wrong. Then unzip this zip file and place it into `modes`, effectively replacing the older folder.
+
+    YOUR SKETCHBOOK/
+      |- ...
+      |
+      |- libraries/
+      |   |- site-packages/
+      |       |- mylib.py
+      |- modes/
+      |   |- old/
+      |   |- PythonMode/     <-- unzip the archive to live here
+      |
+      |- ...
+
+Once you've restarted Processing, Python mode should create the `site-packages` folder for you. If it didn't, create the folder yourself.
+
+To test, create a `mylib.py` file in the `site-packages` folder. Then in a Processing Python mode sketch, you should be able to `import mylib`.
+
+Note that this particular build has been tested on macOS, but not Windows yet.
+
 
 ## Contributing
 
