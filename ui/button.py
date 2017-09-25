@@ -6,6 +6,9 @@ class Button(Control):
         super(Button, self).__init__(controlId, title=title, size=size, position=position)
 
     def draw(self, graphics):
+        if not self.visible:
+            return
+        
         graphics.noStroke()
         if self.mouseHover:
             graphics.fill(0, 100, 150)
