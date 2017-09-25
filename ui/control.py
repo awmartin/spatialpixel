@@ -5,6 +5,7 @@ class Control(object):
         self.size = (100, 20) if size is None else size
         self.position = (0, 0) if position is None else position
         self.controller = None
+        self.visible = True
 
     @property
     def sketch(self):
@@ -29,3 +30,14 @@ class Control(object):
 
     def click(self):
         pass
+
+    def show(self):
+        self.visible = True
+    def hide(self):
+        self.visible = False
+    @property
+    def isVisible(self):
+        return self.visible
+
+    def setController(self, controller):
+        self.controller = controller
