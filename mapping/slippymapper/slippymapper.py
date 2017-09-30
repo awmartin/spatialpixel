@@ -1,6 +1,6 @@
 import math
 from ...util import lazyimages
-from marker import SlippyMarker
+from marker import *
 from tile_servers import tile_servers
 
 
@@ -34,7 +34,7 @@ class SlippyMapper(object):
 
     tileSize = 256.0
 
-    def __init__(self, lat, lon, zoom, width=256, height=256, server='toner'):
+    def __init__(self, lat, lon, zoom, server='toner', width=512, height=512):
         self.baseMap = createGraphics(floor(width), floor(height))
 
         self.setServer(server)
@@ -136,6 +136,9 @@ class SlippyMapper(object):
         for layer in self.layers:
             layer.render()
 
+        for marker in self.markers:
+            marker.draw()
+
     # TODO Revisit map filters.
     # def makeGrayscale(self):
     #     self.baseMap.loadPixels()
@@ -169,10 +172,30 @@ class SlippyMapper(object):
             return
         self.lazyImageManager.request()
 
-    def addMarker(self, markerLat, markerLon, markerColor=None, markerTitle=None):
-        marker = SlippyMarker(markerLat, markerLon, markerColor, markerTitle)
-        marker.setUnderlayMap(self)
-        self.markers.append(marker)
+    def addMarker(self, latitude, longitude, marker=None):
+        if marker is None:
+            m = CircleMarker(6)
+
+        elif callable(marker):
+            # The case that marker is a function of: x, y, pgraphics.
+            m = SimpleMarker(marker)
+
+        elif isinstance(marker, str):
+            m = TextMarker(marker)
+
+        elif isinstance(marker, int) or isinstance(marker, float):
+            m = CircleMarker(marker)
+
+        elif isinstance(marker, PImage):
+            m = ImageMarker(marker)
+
+        else:
+            m = marker
+
+        m.setUnderlayMap(self)
+        m.setLocation(latitude, longitude)
+
+        self.markers.append(m)
 
     def addLayer(self, layer):
         self.layers.append(layer)
@@ -209,3 +232,9 @@ class SlippyMapper(object):
     def yToLat(self, y):
         tile = (y - (self.height / 2.0)) / self.tileSize + self.centerY
         return tileToLat(tile, self.zoom)
+
+    def latlonToPixel(self, loc):
+        return (self.lonToX(loc[0]), self.latToY(loc[1]))
+
+    def pixelToLatLon(self, pixel):
+        return (self.xToLon(pixel[0]), self.yToLat(pixel[1]))
