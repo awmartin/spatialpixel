@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns='http://www.opengis.net/kml/2.2' xmlns:gx='http://www.google.com/kml/ext/2.2'>
+	<Document>
+		<Placemark>
+			<open>1</open>
+			<gx:Track>
+				<altitudeMode>clampToGround</altitudeMode>
+				<when>2016-05-25T01:37:15Z</when>
+				<gx:coord>-73.95967759999999 40.799464799999996 0</gx:coord>
+				<when>2016-05-25T01:36:14Z</when>
+				<gx:coord>-73.962249 40.7936604 0</gx:coord>
+				<when>2016-05-25T01:32:34Z</when>
+				<gx:coord>-73.96849379999999 40.7859088 0</gx:coord>
+				<when>2016-05-25T01:30:04Z</when>
+				<gx:coord>-73.9809827 40.770091699999995 0</gx:coord>
+				<when>2016-05-25T01:29:03Z</when>
+				<gx:coord>-73.982652 40.767544400000006 0</gx:coord>
+				<when>2016-05-25T01:27:29Z</when>
+				<gx:coord>-73.9798808 40.761291899999996 0</gx:coord>
+				<when>2016-05-25T01:26:57Z</when>
+				<gx:coord>-73.9822092 40.7630313 0</gx:coord>
+				<when>2016-05-25T01:26:25Z</when>
+				<gx:coord>-73.9811205 40.76297290000001 0</gx:coord>
+				<when>2016-05-25T01:24:42Z</when>
+				<gx:coord>-73.9810746 40.759223299999995 0</gx:coord>
+				<when>2016-05-25T01:24:11Z</when>
+				<gx:coord>-73.9815796 40.758484599999996 0</gx:coord>
+				<when>2016-05-25T01:21:06Z</when>
+				<gx:coord>-73.9877346 40.7488528 0</gx:coord>
+				<when>2016-05-25T01:19:27Z</when>
+				<gx:coord>-73.98809609999999 40.7486643 0</gx:coord>
+				<when>2016-05-25T01:18:27Z</when>
+				<gx:coord>-73.9880957 40.748524499999995 0</gx:coord>
+				<when>2016-05-25T01:17:57Z</when>
+				<gx:coord>-73.9880423 40.7485855 0</gx:coord>
+			</gx:Track>
+		</Placemark>
+	</Document>
+</kml>
