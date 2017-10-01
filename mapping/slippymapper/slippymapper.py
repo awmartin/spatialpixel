@@ -37,12 +37,7 @@ class SlippyMapper(object):
     def __init__(self, lat, lon, zoom, width=256, height=256, server='toner'):
         self.baseMap = createGraphics(floor(width), floor(height))
 
-        if server in tile_servers:
-            self.url = tile_servers[server]
-        else:
-            print "Got %s as a tile server but that didn't exist. Available servers are %s. Falling back to 'toner'." % \
-                (server, ", ".join(tile_servers.keys()))
-            self.url = tile_servers['toner']
+        self.setServer(server)
 
         self.lat = lat
         self.lon = lon
@@ -56,6 +51,15 @@ class SlippyMapper(object):
         self.lazyImageManager = lazyimages.LazyImageManager()
         self.layers = []
         self.markers = []
+
+    def setServer(self, server):
+        self.server = server
+        if server in tile_servers:
+            self.url = tile_servers[server]
+        else:
+            print "Got %s as a tile server but that didn't exist. Available servers are %s. Falling back to 'toner'." % \
+                (server, ", ".join(tile_servers.keys()))
+            self.url = tile_servers['toner']
 
     def setZoom(self, zoom):
         print "Setting zoom to", zoom

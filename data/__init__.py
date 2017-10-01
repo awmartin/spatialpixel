@@ -1,2 +1,2 @@
-from geojson import *
-from kml import *
+import geojson
+import kml

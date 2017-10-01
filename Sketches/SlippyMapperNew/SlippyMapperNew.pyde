@@ -1,9 +1,12 @@
-import slippymapper
-import panner
+import spatialpixel.mapping.slippymapper as slippymapper
+import spatialpixel.ui.panner as panner
+import spatialpixel.ui.interface as interface
+import spatialpixel.ui.button as button
+import spatialpixel.ui.dropdown as dropdown
 
-import renderkml
-import rendergeojson
-import googledirections
+import spatialpixel.data.kml as kml
+import spatialpixel.data.geojson as geojson
+import spatialpixel.google.directions as directions
 
 import csv
 
@@ -15,7 +18,7 @@ def setup():
     # Make it twice the size of the sketch window. Pick a renderer. For more renders, check slippymapper.py.
     global slippy
     slippy = slippymapper.SlippyMapper(40.714728, -73.998672, 12, width*2, height*2, 'carto-light')
-    
+
 
     # Adding single markers.
     slippy.addMarker(40.808238, -73.959277, color(255,0,0), "Avery GSAPP")
@@ -23,24 +26,24 @@ def setup():
     slippy.addMarker(40.660212, -73.968962, color(255,0,0), "Prospect Park")
 
     # An example running route from mapmyrun.com.
-    slippy.addLayer(rendergeojson.SlippyLayer("route1762551746.geojson"))
+    slippy.addLayer(geojson.SlippyLayer("route1762551746.geojson"))
 
     # To view the earthquakes sample, try setting the map zoom above to 3.
-    # slippy.addLayer(rendergeojson.SlippyLayer("earthquakes_all_day_20170921.geojson"))
+    # slippy.addLayer(geojson.SlippyLayer("earthquakes_all_day_20170921.geojson"))
 
     # If you download your Location History from Google, you can export as KML and attempt to load it here.
     # It currently shows the locations it contains as points.
-    # slippy.addLayer(renderkml.SlippyLayer("google-location-history.kml"))
+    # slippy.addLayer(kml.SlippyLayer("google-location-history.kml"))
 
 
     # Render all the different ways you can get from point a to b.
     apiKey = ''
     a = (40.808238, -73.959277)
     b = (40.745530, -73.946631)
-    slippy.addLayer(googledirections.SlippyLayer(apiKey, a, b, mode='bicycling', strokeColor=color(0,255,0)))
-    # slippy.addLayer(googledirections.SlippyLayer(apiKey, a, b, mode='walking', strokeColor=color(0,0,255)))
-    # slippy.addLayer(googledirections.SlippyLayer(apiKey, a, b, mode='driving', strokeColor=color(255,0,0)))
-    # slippy.addLayer(googledirections.SlippyLayer(apiKey, a, b, mode='transit', strokeColor=color(0,255,255)))
+    slippy.addLayer(directions.SlippyLayer(apiKey, a, b, mode='bicycling', strokeColor=color(0,255,0)))
+    # slippy.addLayer(directions.SlippyLayer(apiKey, a, b, mode='walking', strokeColor=color(0,0,255)))
+    # slippy.addLayer(directions.SlippyLayer(apiKey, a, b, mode='driving', strokeColor=color(255,0,0)))
+    # slippy.addLayer(directions.SlippyLayer(apiKey, a, b, mode='transit', strokeColor=color(0,255,255)))
 
 
     # Speculate on routes taken by actual Citibike customers.
@@ -58,7 +61,7 @@ def setup():
     #         end_lon = float(row[10])
     #         b = (end_lat, end_lon)
 
-    #         route = googledirections.SlippyLayer(apiKey, a, b, mode='bicycling', strokeColor=color(0,255,0))
+    #         route = directions.SlippyLayer(apiKey, a, b, mode='bicycling', strokeColor=color(0,255,0))
     #         slippy.addLayer(route)
 
 
@@ -70,6 +73,18 @@ def setup():
     global pan
     pan = panner.Panner(this, x=-(slippy.width - width)/2, y=-(slippy.height - height)/2)
 
+    global ui
+    ui = interface.Interface(this)
+    ui.addControl(button.Button('zoomin', zoomIn, "+", (30, 30), (10, 40)))
+    ui.addControl(button.Button('zoomout', zoomOut, "-", (30, 30), (10, 75)))
+    ui.addControl(dropdown.DropDown("server", slippymapper.tile_servers, getServer, setServer, size=(150, 20), position=(width-160, 10)))
+
+def getServer():
+    return slippy.server
+
+def setServer(server):
+    slippy.setServer(server)
+    slippy.render()
 
 def draw():
     background(255)
@@ -104,6 +119,9 @@ def drawExample():
 # --------------------------------------------------------------------------------------
 # Interaction
 
+def mouseClicked():
+    ui.click()
+
 def mouseDragged():
     pan.drag()
 
@@ -111,17 +129,11 @@ def keyPressed():
     lat = slippy.yToLat(height / 2 - pan.panY)
     lon = slippy.xToLon(width / 2 - pan.panX)
 
-    if key in ("=", "+"):   # Zoom in
-        slippy.setCenter(lat, lon)
-        slippy.setZoom(slippy.zoom + 1)
-        pan.reset()
-        slippy.render()
+    if key in ("=", "+"):
+        zoomIn()
 
-    elif key in ("-", "_"):   # Zoom out
-        slippy.setCenter(lat, lon)
-        slippy.setZoom(slippy.zoom - 1)
-        pan.reset()
-        slippy.render()
+    elif key in ("-", "_"):
+        zoomOut()
 
     elif key in ("r", " "):    # Recenter the map
         slippy.setCenter(lat, lon)
@@ -138,6 +150,21 @@ def keyPressed():
         slippy.baseMap.save("output/basemap.png")
         print "Done exporting."
 
+def zoomIn():
+    lat = slippy.yToLat(height / 2 - pan.panY)
+    lon = slippy.xToLon(width / 2 - pan.panX)
+    slippy.setCenter(lat, lon)
+    slippy.setZoom(slippy.zoom + 1)
+    pan.reset()
+    slippy.render()
+
+def zoomOut():
+    lat = slippy.yToLat(height / 2 - pan.panY)
+    lon = slippy.xToLon(width / 2 - pan.panX)
+    slippy.setCenter(lat, lon)
+    slippy.setZoom(slippy.zoom - 1)
+    pan.reset()
+    slippy.render()
 
 # --------------------------------------------------------------------------------------
 # GUI
@@ -145,6 +172,7 @@ def keyPressed():
 def drawGui():
     drawCoordinates()
     drawHelp()
+    ui.draw(mousePressed)
 
 def drawCoordinates():
     noStroke()
