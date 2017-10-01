@@ -32,7 +32,7 @@ def setup():
 
     # If you download your Location History from Google, you can export as KML and attempt to load it here.
     # It currently shows the locations it contains as points.
-    # slippy.addLayer(kml.SlippyLayer("google-location-history.kml"))
+    # slippy.addLayer(kml.SlippyLayer("location-history-sample.kml"))
 
 
     # Render all the different ways you can get from point a to b.

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns='http://www.opengis.net/kml/2.2' xmlns:gx='http://www.google.com/kml/ext/2.2'>
+	<Document>
+		<Placemark>
+			<open>1</open>
+			<gx:Track>
+				<altitudeMode>clampToGround</altitudeMode>
+				<when>2017-09-17T21:38:07Z</when>
+				<gx:coord>-73.9561983 40.7480903 8</gx:coord>
+				<when>2017-09-13T04:47:58Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+				<when>2017-09-13T04:27:59Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+				<when>2017-09-12T22:55:30Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 13</gx:coord>
+				<when>2017-09-12T22:52:33Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+				<when>2017-09-12T22:51:34Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+				<when>2017-09-12T18:49:24Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+				<when>2017-09-12T18:30:19Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+				<when>2017-09-12T16:49:33Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+				<when>2017-09-12T16:49:16Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+				<when>2017-09-12T16:30:07Z</when>
+				<gx:coord>-73.95642889999999 40.7481668 18</gx:coord>
+			</gx:Track>
+		</Placemark>
+	</Document>
+</kml>
