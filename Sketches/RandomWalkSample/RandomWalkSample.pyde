@@ -25,7 +25,7 @@ def setup():
     render = createGraphics(width, height)
     
     global walker
-    walker = rwg.RandomWalkGenerator(is3D=False, allowOverlap=False)
+    walker = rwg.RandomWalkGenerator(is3D=False, allowOverlap=True)
     
     # To run the path and draw it as it searches, call the start() method and
     # in draw(), use the step() method to draw the path.
@@ -48,8 +48,8 @@ def draw():
     pushMatrix()
     background(255)
     translate(panX, panY)
-    drawPath(walker.path)
-    # drawLastStep(walker.path)
+    # drawPath(walker.path)
+    drawLastStep(walker.path)
     popMatrix()
     
     gui.draw(mousePressed)
@@ -115,10 +115,10 @@ def drawAgent(location):
     noStroke()
     
     # For drawPath()
-    translate(location[0] * step, location[1] * step)
+    # translate(location[0] * step, location[1] * step)
     
     # For drawLastStep()
-    # translate(location[0] * step + render.width / 2, location[1] * step + render.height / 2)
+    translate(location[0] * step + render.width / 2, location[1] * step + render.height / 2)
     
     # 3D
     # translate(location[0] * step, location[1] * step, location[2] * step)

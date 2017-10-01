@@ -5,8 +5,8 @@ background(255)
 fill(255, 0, 0)
 noStroke()
 
- 
-worldmap = loadImage("https://raw.githubusercontent.com/awmartin/spatialpixel/master/Assets/Maps/BlankMap-Equirectangular-720px.png")
+
+worldmap = loadImage("https://spatialpixel.s3.amazonaws.com/maps/worldmap-equirectangular-720px.png")
 image(worldmap, (width - worldmap.width)/2, (height - worldmap.height)/2)
 print worldmap.width, worldmap.height
 
@@ -22,9 +22,9 @@ scale(2, -2)
 with open("quakes.csv") as f:
     reader = csv.reader(f)
     header = reader.next() # Skip the header row.
-    
+
     for row in reader:
         lon = float(row[3])
         lat = float(row[2])
-        
+
         ellipse(lon, lat, 2, 2)

@@ -1,0 +1,1 @@
+from lazyimages import LazyImageManager
