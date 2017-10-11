@@ -25,7 +25,7 @@ def setup():
     slippy.addMarker(40.660212, -73.968962, "Prospect Park")
 
     # An example running route from mapmyrun.com.
-    slippy.addLayer(geojson.SlippyLayer("route1762551746.geojson"))
+    # slippy.addLayer(geojson.SlippyLayer("route1762551746.geojson"))
 
     # To view the earthquakes sample, try setting the map zoom above to 3.
     # slippy.addLayer(geojson.SlippyLayer("earthquakes_all_day_20170921.geojson"))
@@ -39,29 +39,35 @@ def setup():
     apiKey = ''
     a = (40.808238, -73.959277)
     b = (40.745530, -73.946631)
-    slippy.addLayer(directions.SlippyLayer(apiKey, a, b, mode='bicycling', strokeColor=color(0,255,0)))
-    # slippy.addLayer(directions.SlippyLayer(apiKey, a, b, mode='walking', strokeColor=color(0,0,255)))
-    # slippy.addLayer(directions.SlippyLayer(apiKey, a, b, mode='driving', strokeColor=color(255,0,0)))
-    # slippy.addLayer(directions.SlippyLayer(apiKey, a, b, mode='transit', strokeColor=color(0,255,255)))
+    trip = directions.SlippyLayer(apiKey)
+
+    trip.addRoute(a, b, 'bicycling', strokeColor=color(0,255,0))
+    trip.addRoute(a, b, 'walking', strokeColor=color(0,0,255))
+    trip.addRoute(a, b, 'driving', strokeColor=color(255,0,0))
+    trip.addRoute(a, b, 'transit', strokeColor=color(0,255,255))
+
+    slippy.addLayer(trip)
 
 
     # Speculate on routes taken by actual Citibike customers.
 
+    # citibike = directions.SlippyLayer(apiKey)
+    # slippy.addLayer(citibike)
+    #
     # with open('citibike.csv') as f:
     #     reader = csv.reader(f)
     #     header = reader.next()
-
+    #
     #     for row in reader:
     #         start_lat = float(row[5])
     #         start_lon = float(row[6])
     #         a = (start_lat, start_lon)
-
+    #
     #         end_lat = float(row[9])
     #         end_lon = float(row[10])
     #         b = (end_lat, end_lon)
-
-    #         route = directions.SlippyLayer(apiKey, a, b, mode='bicycling', strokeColor=color(0,255,0))
-    #         slippy.addLayer(route)
+    #
+    #         citibike.addRoute(a, b, 'bicycling', strokeColor=color(255))
 
 
     # Render the map. Since this is expensive, we should be explicit about when this happens.
@@ -76,14 +82,11 @@ def setup():
     ui = interface.Interface(this)
     ui.addControl(button.Button('zoomin', zoomIn, "+", (30, 30), (10, 40)))
     ui.addControl(button.Button('zoomout', zoomOut, "-", (30, 30), (10, 75)))
-    ui.addControl(dropdown.DropDown("server", slippymapper.tile_servers, getServer, setServer, size=(150, 20), position=(width-160, 10)))
+    ui.addControl(dropdown.DropDown("tileserver", slippymapper.tile_servers,
+        getServer, setServer,
+        size=(150, 20), position=(width-160, 10))
+        )
 
-def getServer():
-    return slippy.server
-
-def setServer(server):
-    slippy.setServer(server)
-    slippy.render()
 
 def draw():
     background(255)
@@ -91,7 +94,7 @@ def draw():
     pushMatrix()
     pan.pan()
     slippy.draw()
-    drawExample()
+    # drawExample()
     popMatrix()
 
     drawGui()
@@ -191,3 +194,10 @@ def drawHelp():
 
     fill(255)
     text("+/- to zoom, r to recenter, e to export, b to export the basemap", 15, height - 15)
+
+def getServer():
+    return slippy.server
+
+def setServer(server):
+    slippy.setServer(server)
+    slippy.render()

@@ -1,39 +1,44 @@
 import googledirections
 
-class SlippyLayer(object):
-    def __init__(self, apiKey, startLocation, endLocation, mode='driving', strokeColor=color(255,0,0), fillColor=None):
-        self.apiKey = apiKey
-        self.startLocation = startLocation
-        self.endLocation = endLocation
-        self.mode = mode
-        self.strokeColor = strokeColor
-        self.fillColor = fillColor
 
-        self.layerObject = googledirections.RenderGoogleDirections(apiKey)
+class RenderableRoute(object):
+    def __init__(self, route, strokeColor):
+        self.route = route
+        self.strokeColor = strokeColor
+
+    def render(self, *args, **kwds):
+        self.route.render(*args, **kwds)
+
+
+class SlippyLayer(object):
+    def __init__(self, apiKey, startLocation=None, endLocation=None, mode=None, strokeColor=None):
+        self.apiKey = apiKey
+
+        self.routes = []
         self.underlayMap = None
 
-        self.layerObject.request(self.startLocation, self.endLocation, self.mode)
+        # Backwards compatibility. *Deprecated*
+        if startLocation is not None and endLocation is not None:
+            self.addRoute(startLocation, endLocation, mode=mode, strokeColor=strokeColor)
 
     def setUnderlayMap(self, m):
         self.underlayMap = m
 
+    def addRoute(self, start, end, mode='driving', strokeColor=color(0)):
+        route = googledirections.RenderGoogleDirections(self.apiKey)
+        # TODO Send directions requests asynchronously, or at least on first render, or request() method.
+        route.request(start, end, mode)
+        self.routes.append(RenderableRoute(route, strokeColor))
+
     def render(self):
         self.layer = createGraphics(self.underlayMap.width, self.underlayMap.height)
         self.layer.beginDraw()
+        self.layer.noFill()
 
-        if self.fillColor is not None:
-            self.layer.fill(self.fillColor)
-        else:
-            self.layer.noFill()
-
-        if self.strokeColor is not None:
-            self.layer.stroke(self.strokeColor)
-        else:
-            self.layer.noStroke()
-
-        self.layer.strokeWeight(1.5)
-
-        self.layerObject.render(self.underlayMap.lonToX, self.underlayMap.latToY, self.layer)
+        for route in self.routes:
+            self.layer.stroke(route.strokeColor)
+            self.layer.strokeWeight(1.5)
+            route.render(self.underlayMap.lonToX, self.underlayMap.latToY, self.layer)
 
         self.layer.endDraw()
 
