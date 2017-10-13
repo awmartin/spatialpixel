@@ -19,6 +19,9 @@ class Panner(object):
         self.panY = self.originalPanY
 
     def pan(self):
+        self.translate()
+
+    def translate(self):
         self.sketch.translate(self.panX, self.panY)
         self.sketch.scale(self.zoomFactor)
 
