@@ -56,7 +56,8 @@ class DropDown(Control):
         graphics.rect(self.x, self.y, self.width, self.height)
         graphics.fill(255)
 
-        graphics.text(self.title.upper(), self.x + 5, self.y + 15)
+        title = self.getter().upper()
+        graphics.text(title, self.x + 5, self.y + 15)
 
         for opt in self.optionButtons:
             opt.draw(graphics)
@@ -75,6 +76,6 @@ class DropDown(Control):
 
     def close(self):
         self.state = 'closed'
-        self.controller.hardRefresh()
+        self.controller.clear()
         for opt in self.optionButtons:
             opt.hide()

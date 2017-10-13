@@ -33,11 +33,7 @@ class Interface(object):
     def getControl(self, controlId):
         return self.controls[controlId]
 
-    def hardRefresh(self):
-        # self.graphics.beginDraw()
-        # self.graphics.background(self.graphics.color(0,0,0,0))
-        # self.graphics.endDraw()
-        self.graphics.loadPixels()
-        for i in xrange(0, self.graphics.width * self.graphics.height):
-            self.graphics.pixels[i] = self.graphics.color(0,0,0,0)
-        self.graphics.updatePixels()
+    def clear(self):
+        self.graphics.beginDraw()
+        self.graphics.background(self.graphics.color(0,0,0), 0)
+        self.graphics.endDraw()
