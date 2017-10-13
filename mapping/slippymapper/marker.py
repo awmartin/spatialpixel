@@ -3,12 +3,16 @@
 There are several ways to add a marker to a SlippyMapper, all use the addMarker()
 method in the SlippyMapper class.
 
-1. Provide a string or number:
+1. Provide a value:
 
+    map.addMarker(40.71, -73.9)
     map.addMarker(40.71, -73.9, "New York City")
     map.addMarker(40.71, -73.9, 3)
 
-In the latter, the marker is a circle by default.
+In the first and third above, the default shape is a circle. You can also provide a PImage object:
+
+    pin = loadImage("map-pin.png")
+    map.addMarker(40.71, -73.9, pin)
 
 2. Provide a function:
 
@@ -18,7 +22,18 @@ In the latter, the marker is a circle by default.
 
 With this, you can start marking the marker interactive.
 
+    def hoverCross(x, y, marker):
+        if dist(x, y, mouseX, mouseY) < 5:
+            fill(255, 0, 0)
+        else:
+            fill(64)
+        marker.ellipse(x, y, 4, 4)
+    map.addMarker(latitude, longitude, hoverCross)
+
 3. Provide an instance of a prepackaged class, derived from SimpleMarker: TextMarker, CrossMarker, etc.
+
+    circle = slippymapper.CircleMarker(5, color(255, 255, 0))
+    marker.addMarker(latitude, longitude, circle)
 
 4. Provide an instance fo a custom class, derived from DataMarker. Use when you need to bind
 data to a marker for more complex rendering.
@@ -145,6 +160,7 @@ class CrossMarker(SimpleMarker):
     def drawCross(self, x, y, pgraphics):
         pgraphics.line(x - self.size, y - self.size, x + self.size, y + self.size)
         pgraphics.line(x - self.size, y + self.size, x + self.size, y - self.size)
+
 
 class ImageMarker(SimpleMarker):
     def __init__(self, image):
