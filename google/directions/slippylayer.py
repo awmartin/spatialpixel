@@ -9,6 +9,10 @@ class RenderableRoute(object):
     def render(self, *args, **kwds):
         self.route.render(*args, **kwds)
 
+    @property
+    def locations(self):
+        return self.route.locations
+
 
 class SlippyLayer(object):
     def __init__(self, apiKey, startLocation=None, endLocation=None, mode=None, strokeColor=None):
