@@ -2,6 +2,7 @@ import math
 from ...util import lazyimages
 from marker import *
 from tile_servers import tile_servers
+import sys
 
 
 # Fundamental transformations. Reference: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
@@ -57,18 +58,16 @@ class SlippyMapper(object):
         if server in tile_servers:
             self.url = tile_servers[server]
         else:
-            print "Got %s as a tile server but that didn't exist. Available servers are %s. Falling back to 'toner'." % \
-                (server, ", ".join(tile_servers.keys()))
+            sys.stderr.write("Got %s as a tile server but that didn't exist. Available servers are %s. Falling back to 'toner'." % \
+                (server, ", ".join(tile_servers.keys())))
             self.url = tile_servers['toner']
 
     def setZoom(self, zoom):
-        print "Setting zoom to", zoom
         self.zoom = max(min(zoom, 18), 1)
         self.centerX = lonToTile(self.lon, self.zoom)
         self.centerY = latToTile(self.lat, self.zoom)
 
     def setCenter(self, lat, lon):
-        print "Setting the center to", lat, lon
         self.lat = lat
         self.lon = lon
         self.centerX = lonToTile(self.lon, self.zoom)
@@ -237,4 +236,4 @@ class SlippyMapper(object):
         return (self.lonToX(loc[0]), self.latToY(loc[1]))
 
     def pixelToLatLon(self, pixel):
-        return (self.xToLon(pixel[0]), self.yToLat(pixel[1]))
+        return (self.yToLat(pixel[1]), self.xToLon(pixel[0]))
