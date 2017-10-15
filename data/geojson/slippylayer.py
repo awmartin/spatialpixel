@@ -1,13 +1,21 @@
 import geojson
 
 
-class SlippyLayer(object):
-    def __init__(self, filename, strokeColor=None, fillColor=None, styler=None, keyer=None):
-        self.filename = filename
-        self.strokeColor = strokeColor if strokeColor is not None else color(255,0,0)
-        self.fillColor = fillColor
+def defaultkeyer(feature):
+    return None
 
-        self.layerObject = geojson.RenderGeoJson.open(filename, styler, keyer)
+def defaultstyler(key, feature):
+    feature.noFill()
+    feature.stroke(255, 0, 0)
+
+class SlippyLayer(object):
+    def __init__(self, filename, styler=None, keyer=None):
+        self.filename = filename
+
+        self.styler = styler if styler is not None else defaultstyler
+        self.keyer = keyer if keyer is not None else defaultkeyer
+
+        self.layerObject = geojson.RenderGeoJson.open(filename, styler=self.styler, keyer=self.keyer)
         self.underlayMap = None
 
     def setUnderlayMap(self, m):
@@ -16,19 +24,7 @@ class SlippyLayer(object):
     def render(self):
         self.layer = createGraphics(self.underlayMap.width, self.underlayMap.height)
         self.layer.beginDraw()
-
-        if self.fillColor is not None:
-            self.layer.fill(self.fillColor)
-        else:
-            self.layer.noFill()
-
-        if self.strokeColor is not None:
-            self.layer.stroke(self.strokeColor)
-        else:
-            self.layer.noStroke()
-
         self.layerObject.render(self.underlayMap.lonToX, self.underlayMap.latToY, self.layer)
-
         self.layer.endDraw()
 
     def draw(self):

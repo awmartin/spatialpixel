@@ -1,7 +1,12 @@
 import json
 
-def noop(*args, **kwds):
+
+def defaultkeyer(feature):
     return None
+
+def defaultstyler(key, feature):
+    feature.noFill()
+    feature.stroke(255, 0, 0)
 
 class RenderGeoJson(object):
     @classmethod
@@ -15,9 +20,9 @@ class RenderGeoJson(object):
         self.data = json.load(file)
 
         # Function that given an id will set the drawing style.
-        self.styler = styler if styler is not None else noop
+        self.styler = styler if styler is not None else defaultstyler
         # Function that given a data point will return a unique key for the renderable element.
-        self.keyer = keyer if keyer is not None else noop
+        self.keyer = keyer if keyer is not None else defaultkeyer
 
         self._elts = []
 
