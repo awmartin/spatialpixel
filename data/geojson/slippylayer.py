@@ -2,13 +2,12 @@ import geojson
 
 
 class SlippyLayer(object):
-    def __init__(self, filename, strokeColor=color(255,0,0), fillColor=None, styler=None):
+    def __init__(self, filename, strokeColor=None, fillColor=None, styler=None, keyer=None):
         self.filename = filename
-        self.strokeColor = strokeColor
+        self.strokeColor = strokeColor if strokeColor is not None else color(255,0,0)
         self.fillColor = fillColor
-        self.styler = styler
 
-        self.layerObject = geojson.RenderGeoJson.open(filename)
+        self.layerObject = geojson.RenderGeoJson.open(filename, styler, keyer)
         self.underlayMap = None
 
     def setUnderlayMap(self, m):
