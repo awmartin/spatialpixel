@@ -42,7 +42,7 @@ data to a marker for more complex rendering.
 
 class SimpleMarker(object):
     def __init__(self, draw):
-        self.drawMarker = draw # self, x, y, pgraphics
+        self.drawMarker = draw
 
         self.latitude = None
         self.longitude = None
@@ -115,6 +115,13 @@ class SimpleMarker(object):
 
         self.setColors(this)
         self.drawMarker(x, y, this)
+
+    @property
+    def latlon(self):
+        return (self.latitude, self.longitude)
+    @property
+    def location(self):
+        return self.latlon
 
 
 class CircleMarker(SimpleMarker):
