@@ -63,7 +63,7 @@ class SlippyMapper(object):
             self.url = tile_servers['toner']
 
     def setZoom(self, zoom):
-        self.zoom = max(min(zoom, 18), 1)
+        self.zoom = max(min(zoom, 18), 0)
         self.centerX = lonToTile(self.lon, self.zoom)
         self.centerY = latToTile(self.lat, self.zoom)
 
