@@ -1,20 +1,16 @@
 import kml
 
 
-def defaultkeyer(feature):
-    return None
-
 def defaultstyler(key, feature):
     feature.noFill()
     feature.stroke(255, 0, 0)
 
 class SlippyLayer(object):
-    def __init__(self, filename, styler=None, keyer=None):
+    def __init__(self, filename, styler=None):
         self.filename = filename
         self.styler = styler if styler is not None else defaultstyler
-        self.keyer = keyer if keyer is not None else defaultkeyer
 
-        self.layerObject = kml.RenderKML.open(filename, styler=self.styler, keyer=self.keyer)
+        self.layerObject = kml.RenderKML.open(filename, styler=self.styler)
         self.underlayMap = None
 
     def setUnderlayMap(self, m):

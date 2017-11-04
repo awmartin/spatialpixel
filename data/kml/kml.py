@@ -10,28 +10,25 @@ def defaultstyler(key, feature):
 
 class RenderKML(object):
     @classmethod
-    def open(self, filename, styler=None, keyer=None):
+    def open(self, filename, styler=None):
         with open(filename) as f:
-            kml = RenderKML(f, styler=styler, keyer=keyer)
+            kml = RenderKML(f, styler=styler)
         kml.parse()
         return kml
 
-    def __init__(self, xmlfile, styler=None, keyer=None):
+    def __init__(self, xmlfile, styler=None):
         self.tree = ET.parse(xmlfile)
-
         self.styler = styler if styler is not None else defaultstyler
-        self.keyer = keyer if keyer is not None else defaultkeyer
-
         self.placemarks = []
 
     def render(self, lonToX, latToY, pgraphics):
         for placemark in self.placemarks:
-            self.styler(placemark.key, pgraphics)
+            self.styler(placemark.placemark, pgraphics)
             placemark.draw(lonToX, latToY, pgraphics)
 
     def draw(self, lonToX, latToY):
         for placemark in self.placemarks:
-            self.styler(placemark.key, pgraphics)
+            self.styler(placemark, pgraphics)
             placemark.draw(lonToX, latToY, this)
 
     def parse(self):
@@ -47,14 +44,12 @@ class RenderKML(object):
 
     # https://developers.google.com/kml/documentation/kmlreference#placemark
     def parse_placemark(self, placemark):
-        key = self.keyer(placemark)
-        self.placemarks.append(KmlPlacemark(placemark, key))
+        self.placemarks.append(KmlPlacemark(placemark))
 
 
 class KmlPlacemark(object):
-    def __init__(self, placemark, key):
+    def __init__(self, placemark):
         self.placemark = placemark
-        self.key = key
 
         self.children = []
         self.parse()
