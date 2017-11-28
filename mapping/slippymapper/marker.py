@@ -141,14 +141,12 @@ class CircleMarker(SimpleMarker):
 class TextMarker(SimpleMarker):
     def __init__(self, text, color=None):
         self.text = text
+        self.color = color if color is not None else 0
 
         super(TextMarker, self).__init__(self.drawText)
 
         self.noStroke()
-        if color is not None:
-            self.fill(color)
-        else:
-            self.fill(0)
+        self.fill(self.color)
 
     def drawText(self, x, y, pgraphics):
         pgraphics.text(self.text, x, y)
