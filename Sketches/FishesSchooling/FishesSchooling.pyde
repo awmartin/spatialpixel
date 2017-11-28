@@ -28,7 +28,7 @@ def setup():
         TurnAwayFromClosestFish(threshold=15.0, speedfactor=5.0, weight=20.0),
         TurnToAverageDirection(closeness=50.0, weight=6.0),
         Swim(speedlimit=3.0, turnratelimit=math.pi / 20.0),
-        WrapAroundWindowEdges()
+        WrapAroundWindowEdges(),
     )
 
     # Make some fish!
@@ -39,7 +39,7 @@ def setup():
 
 
 def draw():
-    background(255)
+    background(24)
     for fish in allfishes:
         fish.move()
         fish.draw()
@@ -49,7 +49,7 @@ class Fish(object):
     fishcolors = (
         color(255, 145, 8),
         color(219, 69, 79),
-        color(0, 0, 0)
+        color(255)
     )
 
     def __init__(self):
