@@ -8,13 +8,12 @@ These sketches are written in Python and [Processing](http://processing.org) 3+,
 
 1. Ensure you have Python mode release 3027 or later.
 2. It will create a `site-packages` folder in your `libraries` folder. This is where your Python dependencies can live (.py files) to be shared among all your Python mode sketches.
-3. Clone this repo into a new subfolder of `site-packages`.
+3. Download `spatialpixel.zip` from the [latest release](https://github.com/awmartin/spatialpixel/releases). Don't download the archives called "Source Code" as they won't include dependencies.
 
+Alternatively for step 3, you can clone this repository:
 
     $ cd libraries/site-packages
-    $ git clone https://github.com/awmartin/spatialpixel
-
-Alternatively, for step 3, you can download the archive of this repo and unzip it into `site-packages`. You'll have to come back periodically to download updates this way if you're not familiar with git.
+    $ git clone https://github.com/awmartin/spatialpixel --recursive
 
 The structure should look like this:
 
@@ -28,7 +27,7 @@ The structure should look like this:
       |
       |- ...
 
-Start Processing in Python Mode and you should be good to go.
+Start Processing in Python Mode and you should be able to import any of the modules included here. e.g. `import spatialpixel.mapping.slippymapper as slippymapper`
 
 ## Available Libraries and Components
 
@@ -62,4 +61,4 @@ If you'd like to contribute, please fork the repo, create a new branch, and send
 
 ## License
 
-MIT License. See [LICENSE.txt](LICENSE.txt).
+MIT License for all the original code in this repo (see [LICENSE.txt](LICENSE.txt)). All dependencies maintain the licenses of their respective projects, all referenced in the `third_party` folder.
