@@ -13,7 +13,7 @@ class SlippyLayer(object):
         file: contains a file object for a geojson file
         RenderGeoJson: contains a RenderGeoJson instance
     '''
-    def __init__(self, source, styler=None, drawfeatures=False):
+    def __init__(self, source, styler=None):
         self.source = source
         if isinstance(source, geojson.RenderGeoJson):
             self.layerObject = source
@@ -21,8 +21,7 @@ class SlippyLayer(object):
             self.layerObject = geojson.RenderGeoJson(source)
 
         self.styler = styler if styler is not None else defaultstyler
-        self.drawfeatures = drawfeatures
-
+        
         self.underlayMap = None
 
     def setUnderlayMap(self, m):

@@ -16,8 +16,16 @@ class RenderGeoJson(object):
     def addelement(self, elt):
         self._elts.append(elt)
 
+    @property
+    def elements(self):
+        return self._elts
+
+    @property
+    def features(self):
+        return self.data['features']
+
     def parse(self):
-        for feature in self.data['features']:  # FeatureCollection
+        for feature in self.features:  # FeatureCollection
             geoType = feature['geometry']['type']
             coords = feature['geometry']['coordinates']
 
@@ -54,6 +62,10 @@ class GeoJsonObject(object):
         self.pts = pts
         self.data = data
 
+    @property
+    def centroid(self):
+        return 0, 0
+
     def draw(self, lonToX, latToY, pgraphics):
         pass
 
@@ -66,6 +78,11 @@ class GeoJsonMultiPolygon(GeoJsonObject):
         for pts in self.coords:
             polygon = GeoJsonPolygon(pts)
             self.polygons.append(polygon)
+
+    @property
+    def centroid(self):
+        # return self.polygons[0].centroid
+        return average([polygon.centroid for polygon in self.polygons])
 
     def draw(self, lonToX, latToY, pgraphics):
         for polygon in self.polygons:
@@ -81,11 +98,20 @@ class GeoJsonPolygon(GeoJsonObject):
             linestring = GeoJsonLineString(pts)
             self.linestrings.append(linestring)
 
+    @property
+    def centroid(self):
+        # According to the spec, the first linestring must be the external outline.
+        return self.linestrings[0].centroid
+
     def draw(self, lonToX, latToY, pgraphics):
         for linestring in self.linestrings:
             linestring.draw(lonToX, latToY, pgraphics)
 
 class GeoJsonLineString(GeoJsonObject):
+    @property
+    def centroid(self):
+        return centroid(self.pts)
+
     def draw(self, lonToX, latToY, pgraphics):
         s = pgraphics.createShape()
         s.beginShape()
@@ -98,6 +124,37 @@ class GeoJsonLineString(GeoJsonObject):
         pgraphics.shape(s, 0, 0)
 
 class GeoJsonPoint(GeoJsonObject):
+    @property
+    def centroid(self):
+        return self.pt
+
     def draw(self, lonToX, latToY, pgraphics):
         lon, lat = self.pt[0], self.pt[1]
         pgraphics.ellipse(lonToX(lon), latToY(lat), 3, 3)
+
+
+def average(pts):
+    lon, lat = 0, 0
+    for pt in pts:
+        lon += pt[0]
+        lat += pt[1]
+    return lon / len(pts), lat / len(pts)
+
+# https://en.wikipedia.org/wiki/Centroid under "Centroid of a polygon"
+def centroid(pts):
+    n = len(pts)
+    if n == 1:
+        return pts[0][0], pts[0][1]
+
+    A = 0
+    for i in xrange(0, n - 1):
+        A += pts[i][0] * pts[i + 1][1] - pts[i + 1][0] * pts[i][1]
+    A *= 0.5
+
+    lon, lat = 0, 0
+    for i in xrange(0, n - 1):
+        b = (pts[i][0] * pts[i + 1][1] - pts[i + 1][0] * pts[i][1])
+        lon += (pts[i][0] + pts[i + 1][0]) * b
+        lat += (pts[i][1] + pts[i + 1][1]) * b
+
+    return lon / (6 * A), lat / (6 * A)
