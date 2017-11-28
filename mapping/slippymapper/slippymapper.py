@@ -182,6 +182,9 @@ class SlippyMapper(object):
         elif isinstance(marker, str):
             m = TextMarker(marker)
 
+        elif isinstance(marker, unicode):
+            m = TextMarker(str(marker))
+
         elif isinstance(marker, int) or isinstance(marker, float):
             m = CircleMarker(marker)
 
@@ -195,6 +198,7 @@ class SlippyMapper(object):
         m.setLocation(latitude, longitude)
 
         self.markers.append(m)
+        return m
 
     def addLayer(self, layer):
         self.layers.append(layer)
