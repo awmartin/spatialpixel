@@ -1,3 +1,16 @@
+"""Dropdown controls for spatialpixel.ui.
+
+Arguments:
+
+- controlId - an arbitrary string to uniquely identify the control
+- options - a dict or list of options, or a function that returns such a list or dict
+- getter - a function that will return the currently selected option
+- setter - a function called when a user selects an option, takes one argument
+- title - the default displayed title as a string
+- size - a tuple of (width, height) in pixels
+- position - a tuple of (x, y) in pixels of the upper-left corner of the control
+"""
+
 from control import Control
 import button
 

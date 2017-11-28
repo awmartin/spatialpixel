@@ -1,3 +1,25 @@
+"""Build standard, boring user interfaces in processing.py.
+
+An Interface object can hold multiple Controls that represent standard
+UI elements, like buttons, dropdown menus, etc.
+
+To create an interface:
+
+    import spatialpixel.ui as ui
+
+    def setup():
+        global gui
+        gui = ui.Interface(this)
+
+    def draw():
+        global gui
+        gui.draw(mousePressed)
+
+    def mouseClicked():
+        global gui
+        gui.click()
+"""
+
 class Interface(object):
     def __init__(self, sketch, fontName=None):
         self.sketch = sketch
@@ -31,7 +53,11 @@ class Interface(object):
                 control.click()
 
     def getControl(self, controlId):
-        return self.controls[controlId]
+        """Returns a Control instance given its id."""
+
+        if controlId in self.controls:
+            return self.controls[controlId]
+        return None
 
     def clear(self):
         self.graphics.beginDraw()
