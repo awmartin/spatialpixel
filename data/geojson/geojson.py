@@ -126,10 +126,10 @@ class GeoJsonLineString(GeoJsonObject):
 class GeoJsonPoint(GeoJsonObject):
     @property
     def centroid(self):
-        return self.pt
+        return self.pts
 
     def draw(self, lonToX, latToY, pgraphics):
-        lon, lat = self.pt[0], self.pt[1]
+        lon, lat = self.pts[0], self.pts[1]
         pgraphics.ellipse(lonToX(lon), latToY(lat), 3, 3)
 
 
