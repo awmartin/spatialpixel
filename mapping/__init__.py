@@ -1,1 +1,2 @@
 import slippymapper
+import openstreetmap

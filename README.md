@@ -38,6 +38,7 @@ Start Processing in Python Mode and you should be able to import any of the modu
   - directions
   - streetview
 - mapping
+  - openstreetmap
   - slippymapper
 - path
   - randomwalk
