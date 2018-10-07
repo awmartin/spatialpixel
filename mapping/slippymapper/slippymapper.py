@@ -4,6 +4,7 @@ from marker import *
 from tile_servers import tile_servers
 import sys
 
+# TODO Extract the processing-specific code.
 
 # Fundamental transformations. Reference: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
@@ -33,63 +34,122 @@ def tileToLat(tile, zoom):
 class SlippyMapper(object):
     """SlippyMap will draw a map given a location, zoom, and public tile server."""
 
-    tileSize = 256.0
+    tile_size = 256.0
 
     def __init__(self, lat, lon, zoom, server='toner', width=512, height=512):
-        self.baseMap = createGraphics(floor(width), floor(height))
+        self._width = width
+        self._height = height
+        self._basemap = None
 
-        self.setServer(server)
+        self.set_server(server)
 
         self.lat = lat
         self.lon = lon
-        self.setZoom(zoom)
+        self.set_zoom(zoom)
 
         self.centerX = lonToTile(self.lon, self.zoom)
         self.centerY = latToTile(self.lat, self.zoom)
-        self.offsetX = floor((floor(self.centerX) - self.centerX) * self.tileSize)
-        self.offsetY = floor((floor(self.centerY) - self.centerY) * self.tileSize)
+        self.offsetX = floor((floor(self.centerX) - self.centerX) * self.tile_size)
+        self.offsetY = floor((floor(self.centerY) - self.centerY) * self.tile_size)
 
         self.lazyImageManager = lazyimages.LazyImageManager()
         self.layers = []
         self.markers = []
+    
+    def set_server_url(self, zxyurl):
+        """Allows you to set a custom Z/X/Y server URL instead of picking an included one.
 
-    def setServer(self, server):
-        self.server = server
+        If you look at tile_servers.py, you'll see what these URLs typically look like.
+        Currently, slippymapper assumes you're targeting a Z/X/Y server. For example:
+
+            mymap.setServerUrl("https://tile.server.org/%s/%s/%s.png")
+        
+        The "%s" interpolation is automatically filled out with the Z, X, and Y values,
+        respectively.
+        """
+        self.url = zxyurl
+        self.server = None
+    setServerUrl = set_server_url
+
+    def set_server(self, server):
+        """Set the current render server given the name of a predefined public server.
+
+        See the tile_servers.py file for possible tile servers. All you need to do is provide
+        the name of the server, like "carto-dark". This defaults to Stamen's "toner" server.
+
+        Setting this after the map is rendered requires re-rendering the map by calling render().
+        """
         if server in tile_servers:
+            self.server = server
             self.url = tile_servers[server]
         else:
-            sys.stderr.write("Got %s as a tile server but that didn't exist. Available servers are %s. Falling back to 'toner'." % \
+            sys.stderr.write("""Got %s as a tile server but that didn't exist. 
+Available servers are %s. Falling back to 'toner'. 
+You can also specify a custom ZXY URL with the setServerUrl() method.""" % \
                 (server, ", ".join(tile_servers.keys())))
+            self.server = 'toner'
             self.url = tile_servers['toner']
+    setServer = set_server
 
-    def setZoom(self, zoom):
+    def set_zoom(self, zoom):
         self.zoom = max(min(zoom, 18), 0)
         self.centerX = lonToTile(self.lon, self.zoom)
         self.centerY = latToTile(self.lat, self.zoom)
+    setZoom = set_zoom
 
-    def setCenter(self, lat, lon):
+    def set_center(self, lat, lon):
         self.lat = lat
         self.lon = lon
         self.centerX = lonToTile(self.lon, self.zoom)
         self.centerY = latToTile(self.lat, self.zoom)
+    setCenter = set_center
+
+    @property
+    def has_rendered(self):
+        return self._basemap is not None
+    hasRendered = has_rendered
 
     @property
     def width(self):
-        return self.baseMap.width
+        return self._width
+
     @property
     def height(self):
-        return self.baseMap.height
+        return self._height
+    
+    @property
+    def bounding_box(self):
+        lonwest = self.xToLon(0)
+        loneast = self.xToLon(self.width)
+        latnorth = self.yToLat(0)
+        latsouth = self.yToLat(self.height)
+        return (latsouth, lonwest, latnorth, loneast)
+    boundingBox = bounding_box
+    bbox = bounding_box
+    
+    def set_size(self, width, height):
+        self._width = width
+        self._height = height
 
+        # The basemap is None until we render the first time. So if it's not rendered, rebuild the map.
+        # Thus, setting the size will require re-rendering the map.
+        if self.hasRendered:
+            self._basemap = createGraphics(floor(self._width), floor(self._height))
+    setSize = set_size
+    
     # Inspired by math contained in https://github.com/dfacts/staticmaplite/
     def render(self):
         """Create the map by requesting tiles from the specified tile server."""
 
-        self.baseMap.beginDraw()
-        self.baseMap.background(255)
-        self.baseMap.endDraw()
+        if not self.hasRendered:
+            self._basemap = createGraphics(floor(self._width), floor(self._height))
 
-        numColumns = self.width / self.tileSize
-        numRows = self.height / self.tileSize
+        self._basemap.beginDraw()
+        self._basemap.background(255)
+        self._basemap.endDraw()
+
+        numColumns = self.width / self.tile_size
+        numRows = self.height / self.tile_size
 
         startX = floor(self.centerX - numColumns / 2.0)
         startY = floor(self.centerY - numRows / 2.0)
@@ -97,19 +157,19 @@ class SlippyMapper(object):
         endX = ceil(self.centerX + numColumns / 2.0)
         endY = ceil(self.centerY + numRows / 2.0)
 
-        self.offsetX = -floor((self.centerX - floor(self.centerX)) * self.tileSize) + \
+        self.offsetX = -floor((self.centerX - floor(self.centerX)) * self.tile_size) + \
             floor(self.width / 2.0) + \
-            floor(startX - floor(self.centerX)) * self.tileSize
-        self.offsetY = -floor((self.centerY - floor(self.centerY)) * self.tileSize) + \
+            floor(startX - floor(self.centerX)) * self.tile_size
+        self.offsetY = -floor((self.centerY - floor(self.centerY)) * self.tile_size) + \
             floor(self.height / 2.0) + \
-            floor(startY - floor(self.centerY)) * self.tileSize
+            floor(startY - floor(self.centerY)) * self.tile_size
 
         def onTileLoaded(tile, meta):
-            self.baseMap.beginDraw()
+            self._basemap.beginDraw()
             x = meta['destX']
             y = meta['destY']
-            self.baseMap.image(tile, x, y)
-            self.baseMap.endDraw()
+            self._basemap.image(tile, x, y)
+            self._basemap.endDraw()
 
         for x in xrange(startX, endX):
             for y in xrange(startY, endY):
@@ -118,8 +178,8 @@ class SlippyMapper(object):
                 url = self.url % (self.zoom, x, y)
 
                 # Compute the x and y coordinates for where this tile will go on the map.
-                destX = (x - startX) * self.tileSize + self.offsetX
-                destY = (y - startY) * self.tileSize + self.offsetY
+                destX = (x - startX) * self.tile_size + self.offsetX
+                destY = (y - startY) * self.tile_size + self.offsetY
 
                 # Attempts to load all the images lazily.
                 meta = {
@@ -140,25 +200,25 @@ class SlippyMapper(object):
 
     # TODO Revisit map filters.
     # def makeGrayscale(self):
-    #     self.baseMap.loadPixels()
+    #     self._basemap.loadPixels()
 
-    #     for i in xrange(0, self.baseMap.width * self.baseMap.height):
-    #         b = self.baseMap.brightness(self.baseMap.pixels[i])
-    #         self.baseMap.pixels[i] = self.baseMap.color(b, b, b)
+    #     for i in xrange(0, self._basemap.width * self._basemap.height):
+    #         b = self._basemap.brightness(self._basemap.pixels[i])
+    #         self._basemap.pixels[i] = self._basemap.color(b, b, b)
 
-    #     self.baseMap.updatePixels()
+    #     self._basemap.updatePixels()
 
     # def makeFaded(self):
-    #     self.baseMap.noStroke()
-    #     self.baseMap.fill(255, 255, 255, 128)
-    #     self.baseMap.rect(0, 0, width, height)
+    #     self._basemap.noStroke()
+    #     self._basemap.fill(255, 255, 255, 128)
+    #     self._basemap.rect(0, 0, width, height)
 
     def draw(self):
         """Draws the base map on the Processing sketch canvas."""
 
         self.updateLazyImageLoading()
 
-        image(self.baseMap, 0, 0)
+        image(self._basemap, 0, 0)
 
         for layer in self.layers:
             layer.draw()
@@ -171,7 +231,7 @@ class SlippyMapper(object):
             return
         self.lazyImageManager.request()
 
-    def addMarker(self, latitude, longitude, marker=None):
+    def add_marker(self, latitude, longitude, marker=None):
         if marker is None:
             m = CircleMarker(6)
 
@@ -199,10 +259,12 @@ class SlippyMapper(object):
 
         self.markers.append(m)
         return m
+    addMarker = add_marker
 
-    def addLayer(self, layer):
+    def add_layer(self, layer):
         self.layers.append(layer)
         layer.setUnderlayMap(self)
+    addLayer = add_layer
 
     def save(self, filename):
         self.flattened().save(filename)
@@ -211,7 +273,7 @@ class SlippyMapper(object):
         export = createGraphics(self.width, self.height)
         export.beginDraw()
 
-        export.image(self.baseMap, 0, 0)
+        export.image(self._basemap, 0, 0)
 
         for layer in self.layers:
             export.image(layer.layer, 0, 0)
@@ -223,17 +285,17 @@ class SlippyMapper(object):
         return export
 
     def lonToX(self, lon):
-        return (self.width / 2.0) - self.tileSize * (self.centerX - lonToTile(lon, self.zoom))
+        return (self.width / 2.0) - self.tile_size * (self.centerX - lonToTile(lon, self.zoom))
 
     def latToY(self, lat):
-        return (self.height / 2.0) - self.tileSize * (self.centerY - latToTile(lat, self.zoom))
+        return (self.height / 2.0) - self.tile_size * (self.centerY - latToTile(lat, self.zoom))
 
     def xToLon(self, x):
-        tile = (x - (self.width / 2.0)) / self.tileSize + self.centerX
+        tile = (x - (self.width / 2.0)) / self.tile_size + self.centerX
         return tileToLon(tile, self.zoom)
 
     def yToLat(self, y):
-        tile = (y - (self.height / 2.0)) / self.tileSize + self.centerY
+        tile = (y - (self.height / 2.0)) / self.tile_size + self.centerY
         return tileToLat(tile, self.zoom)
 
     def latlonToPixel(self, loc):
