@@ -2,42 +2,58 @@ import json
 
 
 class RenderGeoJson(object):
-    def __init__(self, fileobj):
-        # TODO Accept a json string and dict containing geojson data.
-        if isinstance(fileobj, str):
-            with open(fileobj) as f:
-                self.data = json.load(f)
-        elif isinstance(fileobj, file):
-            self.data = json.load(f)
+    def __init__(self, data):
+        self.data = None
+
+        if isinstance(data, str):
+            # Hmm, this could be a filename or a string of JSON data.
+            try:
+                # Is this a filename? If so, attempt to open the file.
+                with open(data, 'r') as f:
+                    self.data = json.load(f)
+            except:
+                # Attempt to load as a JSON string.
+                self.data = json.loads(data)
+
+        elif isinstance(data, file):
+            # If handed a file object, just read it.
+            self.data = json.load(data)
+
+        elif isinstance(data, dict):
+            # Assume this is raw GeoJSON.
+            # TODO Validate GeoJSON format.
+            self.data = data
 
         self._elts = []
         self.parse()
 
-    def addelement(self, elt):
+    def add_element(self, elt):
         self._elts.append(elt)
 
     @property
     def elements(self):
-        return self._elts
+        return self._elts or []
 
     @property
     def features(self):
-        return self.data['features']
+        if 'features' in self.data:
+            return self.data['features'] or []
+        return []
 
     def parse(self):
         for feature in self.features:  # FeatureCollection
-            geoType = feature['geometry']['type']
+            geo_type = feature['geometry']['type']
             coords = feature['geometry']['coordinates']
 
-            if geoType == "Polygon":
-                self.addelement(GeoJsonPolygon(coords, feature))
-            elif geoType == "MultiPolygon":
-                self.addelement(GeoJsonMultiPolygon(coords, feature))
-            elif geoType == "LineString":
-                self.addelement(GeoJsonLineString(coords, feature))
-            elif geoType == "Point":
-                self.addelement(GeoJsonPoint(coords, feature))
-            elif geoType == "GeometryCollection":
+            if geo_type == "Polygon":
+                self.add_element(GeoJsonPolygon(coords, feature))
+            elif geo_type == "MultiPolygon":
+                self.add_element(GeoJsonMultiPolygon(coords, feature))
+            elif geo_type == "LineString":
+                self.add_element(GeoJsonLineString(coords, feature))
+            elif geo_type == "Point":
+                self.add_element(GeoJsonPoint(coords, feature))
+            elif geo_type == "GeometryCollection":
                 # TODO GeometryCollection
                 pass
 
