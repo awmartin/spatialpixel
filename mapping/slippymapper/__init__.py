@@ -1,2 +1,2 @@
 from slippymapper import *
-from layer import Layer
+from layer import SlippyLayer

@@ -36,7 +36,7 @@ class SlippyMapper(object):
 
     tile_size = 256.0
 
-    def __init__(self, lat, lon, zoom, server='toner', width=512, height=512):
+    def __init__(self, lat, lon, zoom=12, server='toner', width=512, height=512):
         self._width = width
         self._height = height
         self._basemap = None
@@ -68,7 +68,7 @@ class SlippyMapper(object):
         respectively.
         """
         self.url = zxyurl
-        self.server = None
+        self.server = 'custom'
     setServerUrl = set_server_url
 
     def set_server(self, server):
@@ -82,6 +82,12 @@ class SlippyMapper(object):
         if server in tile_servers:
             self.server = server
             self.url = tile_servers[server]
+        
+        elif server is None:
+            # Don't render a map at all.
+            self.server = None
+            self.url = None
+        
         else:
             sys.stderr.write("""Got %s as a tile server but that didn't exist. 
 Available servers are %s. Falling back to 'toner'. 
@@ -133,63 +139,75 @@ You can also specify a custom ZXY URL with the setServerUrl() method.""" % \
 
         # The basemap is None until we render the first time. So if it's not rendered, rebuild the map.
         # Thus, setting the size will require re-rendering the map.
-        if self.hasRendered:
+        if self.has_rendered:
             self._basemap = createGraphics(floor(self._width), floor(self._height))
     setSize = set_size
+
+    def clear(self):
+        if self.has_rendered:
+            self._basemap.beginDraw()
+            self._basemap.background(255, 0)
+            self._basemap.endDraw()
+    
+    @property
+    def has_tile_server(self):
+        return self.url is not None
+    
+    def get_tile_url(self, x, y):
+        # Interpolate the URL for this particular tile.
+        # e.g. .../12/1208/1541.png
+        return self.url % (self.zoom, x, y)
     
     # Inspired by math contained in https://github.com/dfacts/staticmaplite/
     def render(self):
         """Create the map by requesting tiles from the specified tile server."""
 
-        if not self.hasRendered:
+        if not self.has_rendered:
             self._basemap = createGraphics(floor(self._width), floor(self._height))
 
-        self._basemap.beginDraw()
-        self._basemap.background(255)
-        self._basemap.endDraw()
+        self.clear()
 
-        numColumns = self.width / self.tile_size
-        numRows = self.height / self.tile_size
+        if self.has_tile_server:
+            numColumns = self.width / self.tile_size
+            numRows = self.height / self.tile_size
 
-        startX = floor(self.centerX - numColumns / 2.0)
-        startY = floor(self.centerY - numRows / 2.0)
+            tiles_start_x = floor(self.centerX - numColumns / 2.0)
+            tiles_start_y = floor(self.centerY - numRows / 2.0)
 
-        endX = ceil(self.centerX + numColumns / 2.0)
-        endY = ceil(self.centerY + numRows / 2.0)
+            tiles_end_x = ceil(self.centerX + numColumns / 2.0)
+            tiles_end_y = ceil(self.centerY + numRows / 2.0)
 
-        self.offsetX = -floor((self.centerX - floor(self.centerX)) * self.tile_size) + \
-            floor(self.width / 2.0) + \
-            floor(startX - floor(self.centerX)) * self.tile_size
-        self.offsetY = -floor((self.centerY - floor(self.centerY)) * self.tile_size) + \
-            floor(self.height / 2.0) + \
-            floor(startY - floor(self.centerY)) * self.tile_size
+            self.offsetX = -floor((self.centerX - floor(self.centerX)) * self.tile_size) + \
+                floor(self.width / 2.0) + \
+                floor(tiles_start_x - floor(self.centerX)) * self.tile_size
+            self.offsetY = -floor((self.centerY - floor(self.centerY)) * self.tile_size) + \
+                floor(self.height / 2.0) + \
+                floor(tiles_start_y - floor(self.centerY)) * self.tile_size
 
-        def onTileLoaded(tile, meta):
-            self._basemap.beginDraw()
-            x = meta['destX']
-            y = meta['destY']
-            self._basemap.image(tile, x, y)
-            self._basemap.endDraw()
+            def onTileLoaded(tile, meta):
+                self._basemap.beginDraw()
+                x = meta['destX']
+                y = meta['destY']
+                self._basemap.image(tile, x, y)
+                self._basemap.endDraw()
 
-        for x in xrange(startX, endX):
-            for y in xrange(startY, endY):
-                # Interpolate the URL for this particular tile.
-                # 12/1208/1541.png
-                url = self.url % (self.zoom, x, y)
+            for x in xrange(tiles_start_x, tiles_end_x):
+                for y in xrange(tiles_start_y, tiles_end_y):
+                    tile_url = self.get_tile_url(x, y)
 
-                # Compute the x and y coordinates for where this tile will go on the map.
-                destX = (x - startX) * self.tile_size + self.offsetX
-                destY = (y - startY) * self.tile_size + self.offsetY
+                    # Compute the x and y coordinates for where this tile will go on the map.
+                    destX = (x - tiles_start_x) * self.tile_size + self.offsetX
+                    destY = (y - tiles_start_y) * self.tile_size + self.offsetY
 
-                # Attempts to load all the images lazily.
-                meta = {
-                    'url' : url,
-                    'destX' : destX,
-                    'destY' : destY,
-                    'x' : x,
-                    'y' : y,
-                    }
-                self.lazyImageManager.addLazyImage(url, onTileLoaded, meta)
+                    # Attempts to load all the images lazily.
+                    meta = {
+                        'url' : tile_url,
+                        'destX' : destX,
+                        'destY' : destY,
+                        'x' : x,
+                        'y' : y,
+                        }
+                    self.lazyImageManager.addLazyImage(tile_url, onTileLoaded, meta)
 
         # Kick off all the layer rendering.
         for layer in self.layers:
@@ -218,7 +236,8 @@ You can also specify a custom ZXY URL with the setServerUrl() method.""" % \
 
         self.updateLazyImageLoading()
 
-        image(self._basemap, 0, 0)
+        if self.has_tile_server and self.has_rendered:
+            image(self._basemap, 0, 0)
 
         for layer in self.layers:
             layer.draw()
@@ -273,7 +292,8 @@ You can also specify a custom ZXY URL with the setServerUrl() method.""" % \
         export = createGraphics(self.width, self.height)
         export.beginDraw()
 
-        export.image(self._basemap, 0, 0)
+        if self.has_rendered and self.has_tile_server:
+            export.image(self._basemap, 0, 0)
 
         for layer in self.layers:
             export.image(layer.layer, 0, 0)
