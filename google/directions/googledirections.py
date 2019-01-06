@@ -1,5 +1,6 @@
 import httplib
 import json
+import sys
 
 from ...third_party import googlemaps_convert
 
@@ -37,8 +38,10 @@ class RenderGoogleDirections(object):
         try:
             # TOOD Ensure we're getting all the routes and legs if necessary.
             self.steps = self.data["routes"][0]["legs"][0]["steps"]
-        except:
-            print "Google driving directions didn't load properly for some reason. For now, just try again."
+        except Exception as err:
+            sys.stderr.write("Google driving directions didn't load properly for some reason. For now, just try again.")
+            sys.stderr.write(err)
+            sys.stderr.write(self.data)
 
         conn.close()
 
