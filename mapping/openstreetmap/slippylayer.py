@@ -5,6 +5,7 @@ def defaultStyler(feature, graphics):
     if feature['type'] == 'way':
         graphics.noFill()
         graphics.stroke(255, 0, 0)
+        return True
 
     elif feature['type'] == 'node':
         # graphics.stroke(255)
@@ -12,6 +13,7 @@ def defaultStyler(feature, graphics):
         return False
 
     else:
+        graphics.stroke(0, 255, 0)
         return False
 
 

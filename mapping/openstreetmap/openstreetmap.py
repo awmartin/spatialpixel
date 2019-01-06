@@ -1,3 +1,5 @@
+"""Provides a basic object to query and render OpenStreetMap data."""
+
 import json
 import urllib
 import urllib2
@@ -9,9 +11,9 @@ class OpenStreetMap(object):
     def __init__(self, query=None, bbox=None):
         self.query = query
         self.bbox = bbox
+
         self.data = None
         self.entities = None
-
         self.terms = []
     
     def set_map(self, slippymap):
@@ -19,6 +21,9 @@ class OpenStreetMap(object):
     
     def set_bounding_box(self, latsouth, lonwest, latnorth, loneast):
         self.bbox = (latsouth, lonwest, latnorth, loneast)
+
+    def set_query(self, query):
+        self.query = query
 
     @property
     def query_format(self):
@@ -28,9 +33,6 @@ class OpenStreetMap(object):
     def query_bbox(self):
         return "[bbox:{:f},{:f},{:f},{:f}]".format(*self.bbox)
     
-    def set_query(self, query):
-        self.query = query
-
     def request(self):
         if self.query is None:
             if len(self.terms) > 0:
@@ -90,7 +92,9 @@ class QueryTerm(object):
         self.tags = []
 
         if tags is not None:
-            if isinstance(tags, dict):
+            if isinstance(tags, str):
+                self.tags.append(TagFilter(tags, None))
+            elif isinstance(tags, dict):
                 for key, value in tags.iteritems():
                     self.tags.append(TagFilter(key, value))
 
@@ -129,6 +133,8 @@ class TagFilter(object):
     
     @property
     def term(self):
+        if self.value is None and self.key is not None:
+            return "[%s]" % self.key
         if isinstance(self.value, str):
             # If the value is a string, just place it.
             return "[%s=%s]" % (self.key, self.value)
